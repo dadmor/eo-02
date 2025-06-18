@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Zap, Target, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap, Target, TrendingUp } from 'lucide-react';
 
 export default function WiseAdsLanding() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
-    const handleMouse = (e) => setMousePos({ x: e.clientX, y: e.clientY });
+    const handleMouse = (e: Event) => setMousePos({ x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY });
     const handleScroll = () => setScrollY(window.scrollY);
     
     window.addEventListener('mousemove', handleMouse);
