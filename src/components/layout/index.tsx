@@ -17,8 +17,8 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
       setOpacity(newOpacity);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleMobileMenu = () => {
@@ -27,7 +27,10 @@ export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background relative">
-     <div style={{ opacity }} className="h-96 fixed top-0 w-full bg-gradient-to-br from-zinc-500/5 to-zinc-500/10 -rotate-1 scale-125"></div>
+      <div
+        style={{ opacity }}
+        className="h-96 fixed top-0 w-full bg-gradient-to-br from-zinc-500/0 to-zinc-500/10 -rotate-1 scale-125"
+      ></div>
 
       <div className="flex relative">
         {/* Mobile Overlay */}

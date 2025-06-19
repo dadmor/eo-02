@@ -1,10 +1,9 @@
 import { useLogout, useMenu } from "@refinedev/core";
 import { NavLink } from "react-router";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { LogOut, Menu as MenuIcon, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { UserMicroProfile } from "../layout/UserMicroProfile";
+import { cn } from "@/utility";
+import { Button, ScrollArea, Separator } from "../ui";
 
 interface MenuProps {
   onClose?: () => void;
@@ -41,7 +40,7 @@ export const Menu: React.FC<MenuProps> = ({ onClose }) => {
           </Button>
         )}
       </div>
-      
+
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-2">
@@ -65,9 +64,12 @@ export const Menu: React.FC<MenuProps> = ({ onClose }) => {
           ))}
         </nav>
       </ScrollArea>
-      
-      {/* Footer */}
+
+      {/* User Profile Section */}
       <Separator />
+      <UserMicroProfile className="border-b" />
+
+      {/* Footer */}
       <div className="p-4">
         <Button
           variant="outline"

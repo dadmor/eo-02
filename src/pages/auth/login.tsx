@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { NarrowCol } from '@/components/layout/NarrowCol';
+import { Lead } from '@/components/reader';
 
 export const LoginPage: React.FC = () => {
   const { mutate: login, isLoading, error } = useLogin();
@@ -18,8 +20,8 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <NarrowCol>
+      <Lead title={`Logowanie`} description={`...`} />
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
@@ -28,13 +30,7 @@ export const LoginPage: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Alert>
-              <AlertDescription>
-                <strong>Demo dane:</strong><br />
-                Email: info@refine.dev<br />
-                Hasło: refine-supabase
-              </AlertDescription>
-            </Alert>
+            
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -80,7 +76,7 @@ export const LoginPage: React.FC = () => {
             </form>
 
             <div className="mt-4 text-center text-sm">
-              <a href="/register" className="text-blue-600 hover:text-blue-500">
+              <a href="/register/step1" className="text-blue-600 hover:text-blue-500">
                 Nie masz konta? Zarejestruj się
               </a>
             </div>
@@ -92,7 +88,6 @@ export const LoginPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+     </NarrowCol>
   );
 };

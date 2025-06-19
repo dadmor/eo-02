@@ -1,9 +1,4 @@
-import {
-  Authenticated,
-  ErrorComponent,
-  Refine,
-} from "@refinedev/core";
-
+import { Authenticated, ErrorComponent, Refine } from "@refinedev/core";
 import routerBindings, {
   CatchAllNavigate,
   DocumentTitleHandler,
@@ -12,12 +7,21 @@ import routerBindings, {
 } from "@refinedev/react-router";
 import { dataProvider, liveProvider } from "@refinedev/supabase";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
-import authProvider from "./authProvider";
+import authProvider from "./lib/authProvider";
 import { Layout } from "./components/layout";
 import { supabaseClient } from "./utility";
-import { websiteAnalysisResource, websiteAnalysisRoutes } from "./pages/website-analyses";
-import { marketingStrategyResource, marketingStrategyRoutes } from "./pages/marketing-strategies";
-import { googleAdsCampaignResource, googleAdsCampaignRoutes } from "./pages/google-ads-campaigns";
+import {
+  websiteAnalysisResource,
+  websiteAnalysisRoutes,
+} from "./pages/website-analyses";
+import {
+  marketingStrategyResource,
+  marketingStrategyRoutes,
+} from "./pages/marketing-strategies";
+import {
+  googleAdsCampaignResource,
+  googleAdsCampaignRoutes,
+} from "./pages/google-ads-campaigns";
 import { profileResource, profileRoutes } from "./pages/profiles";
 import { authRoutes } from "./pages/auth";
 
@@ -33,48 +37,39 @@ function App() {
           websiteAnalysisResource,
           marketingStrategyResource,
           googleAdsCampaignResource,
-          profileResource
+          profileResource,
         ]}
         options={{
           syncWithLocation: true,
           warnWhenUnsavedChanges: true,
           useNewQueryKeys: true,
-          projectId: "your-project-id",
         }}
       >
         <Routes>
+          {/* Public routes */}
+          {...authRoutes}
+
+          {/* Protected routes wrapper */}
           <Route
             element={
-              <Authenticated
-                key="authenticated-inner"
-                fallback={<CatchAllNavigate to="/login" />}
-              >
+              <Authenticated key="protected-layout" fallback={<CatchAllNavigate to="/login" />}>
                 <Layout>
                   <Outlet />
                 </Layout>
               </Authenticated>
             }
           >
-            <Route
-              index
-              element={<NavigateToResource resource="website_analyses" />}
-            />
-
+            {/* Default redirect */}
+            <Route index element={<NavigateToResource resource="website_analyses" />} />
+            
+            {/* All protected routes with absolute paths */}
             {...websiteAnalysisRoutes}
             {...marketingStrategyRoutes}
             {...googleAdsCampaignRoutes}
             {...profileRoutes}
+            
+            {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />
-          </Route>
-
-          <Route
-            element={
-              <Authenticated key="authenticated-outer" fallback={<Outlet />}>
-                <NavigateToResource />
-              </Authenticated>
-            }
-          >
-            {...authRoutes}
           </Route>
         </Routes>
 
