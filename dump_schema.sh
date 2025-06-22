@@ -1,14 +1,23 @@
-#!/bin/bash
+#!/bin/sh
 
-# Skrypt do pobierania struktury bazy Supabase
-# Użycie: ./dump_schema.sh
+# URAHAMIAMY PRZEZ BASH!!!!
+# bash dump_schema.sh > schema.sql
 
-CONNECTION_STRING="postgresql://postgres.vvkjfzjikfuqdpmomdbx:mmNj8DAhwxzT3lMlPtjI@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
+# Wyciągnij ref z URL (np. vvkjfzjikfuqdpmomdbx z https://vvkjfzjikfuqdpmomdbx.supabase.co)
+SUPABASE_REF=$(echo "$VITE_SUPABASE_URL" | cut -d'.' -f1 | cut -d'/' -f3)
+
+# Sprawdź czy hasło zostało podane
+if [ -z "$SUPABASE_DB_PASSWORD" ]; then
+  echo "❌ Brakuje zmiennej SUPABASE_DB_PASSWORD w .env"
+  exit 1
+fi
+
+# Zbuduj connection string
+CONNECTION_STRING="postgresql://postgres.$SUPABASE_REF:$SUPABASE_DB_PASSWORD@aws-0-eu-north-1.pooler.supabase.com:5432/postgres"
 OUTPUT_FILE="schema.sql"
 
-echo "Pobieranie struktury bazy danych..."
+echo "📥 Pobieranie struktury bazy danych..."
 
-# Uruchom psql i pobierz strukture, usuń formatowanie
 psql "$CONNECTION_STRING" -t -c "
 SELECT 
   'CREATE TABLE ' || table_name || ' (' || chr(10) ||
@@ -31,14 +40,12 @@ GROUP BY table_name
 ORDER BY table_name;
 " | sed 's/+$//' | sed 's/^ *//' > "$OUTPUT_FILE"
 
-echo "Struktura zapisana do: $OUTPUT_FILE"
-echo "Usuwanie śmieci z pliku..."
+echo "🧹 Czyszczenie pliku wynikowego..."
 
-# Wyczyść plik z nagłówków i pustych linii
 sed -i '/create_statement/d' "$OUTPUT_FILE"
 sed -i '/^-\+$/d' "$OUTPUT_FILE"
 sed -i '/^([0-9]* row/d' "$OUTPUT_FILE"
 sed -i '/^$/d' "$OUTPUT_FILE"
 
-echo "Gotowe! Sprawdź plik: $OUTPUT_FILE"
+echo "✅ Gotowe! Struktura zapisana w: $OUTPUT_FILE"
 cat "$OUTPUT_FILE"
