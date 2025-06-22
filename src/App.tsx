@@ -51,7 +51,10 @@ function App() {
           {/* Protected routes wrapper */}
           <Route
             element={
-              <Authenticated key="protected-layout" fallback={<CatchAllNavigate to="/login" />}>
+              <Authenticated
+                key="protected-layout"
+                fallback={<CatchAllNavigate to="/login" />}
+              >
                 <Layout>
                   <Outlet />
                 </Layout>
@@ -59,14 +62,17 @@ function App() {
             }
           >
             {/* Default redirect */}
-            <Route index element={<NavigateToResource resource="website_analyses" />} />
-            
+            <Route
+              index
+              element={<NavigateToResource resource="website_analyses" />}
+            />
+
             {/* All protected routes with absolute paths */}
             {...websiteAnalysisRoutes}
             {...marketingStrategyRoutes}
             {...googleAdsCampaignRoutes}
             {...profileRoutes}
-            
+
             {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />
           </Route>

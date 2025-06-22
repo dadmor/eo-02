@@ -1,18 +1,29 @@
 import { useForm } from "@refinedev/react-hook-form";
 import { useNavigation } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { Button, Input, Label, Textarea } from "@/components/ui";
 
 const industries = [
-  "Technology", "Healthcare", "Finance", "E-commerce", "Education", 
-  "Real Estate", "Food & Beverage", "Travel", "Fashion", "Automotive"
+  "Technology",
+  "Healthcare",
+  "Finance",
+  "E-commerce",
+  "Education",
+  "Real Estate",
+  "Food & Beverage",
+  "Travel",
+  "Fashion",
+  "Automotive",
 ];
 
 export const WebsiteAnalysisCreate = () => {
@@ -25,7 +36,6 @@ export const WebsiteAnalysisCreate = () => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm();
 
@@ -39,7 +49,7 @@ export const WebsiteAnalysisCreate = () => {
   };
 
   const removeKeyword = (keywordToRemove: string) => {
-    const newKeywords = keywords.filter(k => k !== keywordToRemove);
+    const newKeywords = keywords.filter((k) => k !== keywordToRemove);
     setKeywords(newKeywords);
     setValue("keywords", newKeywords);
   };
@@ -55,8 +65,8 @@ export const WebsiteAnalysisCreate = () => {
     <>
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => list("website_analyses")}
           >
@@ -64,7 +74,9 @@ export const WebsiteAnalysisCreate = () => {
             Back to List
           </Button>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">Create Website Analysis</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Create Website Analysis
+        </h1>
         <p className="text-muted-foreground">Add a new website for analysis</p>
       </div>
 
@@ -81,16 +93,18 @@ export const WebsiteAnalysisCreate = () => {
                   id="url"
                   type="url"
                   placeholder="https://example.com"
-                  {...register("url", { 
+                  {...register("url", {
                     required: "URL is required",
                     pattern: {
                       value: /^https?:\/\/.+/,
-                      message: "Please enter a valid URL"
-                    }
+                      message: "Please enter a valid URL",
+                    },
                   })}
                 />
                 {errors.url && (
-                  <p className="text-sm text-red-500">{errors.url.message as string}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.url.message as string}
+                  </p>
                 )}
               </div>
 
@@ -109,7 +123,9 @@ export const WebsiteAnalysisCreate = () => {
                   </SelectContent>
                 </Select>
                 {errors.industry && (
-                  <p className="text-sm text-red-500">{errors.industry.message as string}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.industry.message as string}
+                  </p>
                 )}
               </div>
             </div>
@@ -120,16 +136,18 @@ export const WebsiteAnalysisCreate = () => {
                 id="description"
                 placeholder="Describe the website's purpose, target audience, and main features..."
                 rows={4}
-                {...register("description", { 
+                {...register("description", {
                   required: "Description is required",
                   minLength: {
                     value: 20,
-                    message: "Description must be at least 20 characters"
-                  }
+                    message: "Description must be at least 20 characters",
+                  },
                 })}
               />
               {errors.description && (
-                <p className="text-sm text-red-500">{errors.description.message as string}</p>
+                <p className="text-sm text-red-500">
+                  {errors.description.message as string}
+                </p>
               )}
             </div>
 
@@ -146,11 +164,15 @@ export const WebsiteAnalysisCreate = () => {
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
-              
+
               {keywords.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {keywords.map((keyword, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    <Badge
+                      key={index}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
                       {keyword}
                       <button
                         type="button"
@@ -163,22 +185,24 @@ export const WebsiteAnalysisCreate = () => {
                   ))}
                 </div>
               )}
-              
+
               {keywords.length === 0 && (
-                <p className="text-sm text-red-500">At least one keyword is required</p>
+                <p className="text-sm text-red-500">
+                  At least one keyword is required
+                </p>
               )}
             </div>
 
             <div className="flex justify-end space-x-4 pt-6 border-t">
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 variant="outline"
                 onClick={() => list("website_analyses")}
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting || keywords.length === 0}
               >
                 {isSubmitting ? "Creating..." : "Create Analysis"}

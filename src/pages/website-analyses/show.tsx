@@ -1,14 +1,6 @@
 import { useShow, useNavigation, useDelete, useList } from "@refinedev/core";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   ArrowLeft,
   Edit,
@@ -24,6 +16,7 @@ import {
 } from "lucide-react";
 import { FlexBox, GridBox } from "@/components/shared";
 import { Lead } from "@/components/reader";
+import { Badge, Button, Separator } from "@/components/ui";
 
 export const WebsiteAnalysisShow = () => {
   const { queryResult } = useShow();

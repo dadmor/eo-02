@@ -5,14 +5,13 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+
 import { Eye, Edit, Trash2, Plus, ExternalLink } from "lucide-react";
 import { FlexBox, GridBox } from "@/components/shared";
 import { PaginationSwith } from "@/components/navigation";
 import { Lead } from "@/components/reader";
 import { useLoading } from "@/utility";
+import { Badge, Button, Input } from "@/components/ui";
 
 
 export const WebsiteAnalysisList = () => {
