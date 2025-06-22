@@ -7,9 +7,8 @@ import routerBindings, {
 } from "@refinedev/react-router";
 import { dataProvider, liveProvider } from "@refinedev/supabase";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
-import authProvider from "./lib/authProvider";
 import { Layout } from "./components/layout";
-import { supabaseClient } from "./utility";
+import { authProvider, supabaseClient } from "./utility";
 import {
   websiteAnalysisResource,
   websiteAnalysisRoutes,

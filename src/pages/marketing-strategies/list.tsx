@@ -12,7 +12,7 @@ import { Eye, Edit, Trash2, Plus, DollarSign } from "lucide-react";
 import { FlexBox, GridBox } from "@/components/shared";
 import { PaginationSwith } from "@/components/navigation";
 import { Lead } from "@/components/reader";
-import { useLoading } from "@/lib/useLoading";
+import { useLoading } from "@/utility";
 
 export const MarketingStrategyList = () => {
   const {

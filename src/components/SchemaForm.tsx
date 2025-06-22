@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useFormSchemaStore } from '@/lib/formSchemaStore';
+import { useFormSchemaStore } from '@/utility';
+
 
 interface SchemaFormProps {
   schemaPath: string;

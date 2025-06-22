@@ -55,7 +55,7 @@ export const BlogPostList = () => {
                 <span className="text-sm text-muted-foreground">
                   #{post.id}
                 </span>
-              </div>
+            </div>
               <CardTitle className="text-lg font-semibold leading-tight">
                 {post.title}
               </CardTitle>

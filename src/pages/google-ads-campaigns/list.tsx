@@ -29,7 +29,6 @@ import {
   Target,
   Globe,
   X,
-  Grid,
 } from "lucide-react";
 import { FlexBox, GridBox } from "@/components/shared";
 import { PaginationSwith } from "@/components/navigation";

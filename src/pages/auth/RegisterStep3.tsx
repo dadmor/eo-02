@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Loader2, Check, Mail, Shield, User } from "lucide-react";
-import { useFormSchemaStore } from "@/lib/formSchemaStore";
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
+import { useFormSchemaStore } from "@/utility/formSchemaStore";
 
 export const RegisterStep3: React.FC = () => {
   const navigate = useNavigate();

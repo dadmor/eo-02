@@ -2,7 +2,7 @@
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
 import { SchemaForm } from "@/components/SchemaForm";
-import { useFormSchemaStore } from "@/lib/formSchemaStore";
+import { useFormSchemaStore } from "@/utility/formSchemaStore";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
