@@ -24,6 +24,12 @@ import {
 import { profileResource, profileRoutes } from "./pages/profiles";
 import { authRoutes } from "./pages/auth";
 
+// Import zorganizowanych beneficiary exports
+import {
+  beneficiaryResources,
+  beneficiaryRoutes,
+} from "./pages/beneficiary";
+
 function App() {
   return (
     <BrowserRouter>
@@ -37,6 +43,8 @@ function App() {
           marketingStrategyResource,
           googleAdsCampaignResource,
           profileResource,
+          // Dodaj beneficiary resources
+          ...beneficiaryResources,
         ]}
         options={{
           syncWithLocation: true,
@@ -67,11 +75,14 @@ function App() {
               element={<NavigateToResource resource="website_analyses" />}
             />
 
-            {/* All protected routes with absolute paths */}
+            {/* Existing routes */}
             {...websiteAnalysisRoutes}
             {...marketingStrategyRoutes}
             {...googleAdsCampaignRoutes}
             {...profileRoutes}
+
+            {/* Beneficiary routes - używamy zorganizowanych routes */}
+            {...beneficiaryRoutes}
 
             {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />
