@@ -532,7 +532,7 @@ export const MyRequests = () => {
                     )}
 
                     {/* Temporarily hide offers section until offers table exists */}
-                    {/* {requestOffers.length > 0 && (
+                    {requestOffers.length > 0 && (
                       <div className="space-y-2">
                         <h4 className="font-medium text-sm">Otrzymane oferty:</h4>
                         <div className="space-y-2">
@@ -559,7 +559,7 @@ export const MyRequests = () => {
                           )}
                         </div>
                       </div>
-                    )} */}
+                    )}
 
                     {/* Opinia */}
                     {request.review_comment && (

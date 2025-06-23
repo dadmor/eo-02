@@ -18,11 +18,15 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+type Identity = {
+  id: string;
+};
+
 export const BeneficiaryDashboard = () => {
   const navigate = useNavigate();
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   // Pobranie zleceń wykonawców

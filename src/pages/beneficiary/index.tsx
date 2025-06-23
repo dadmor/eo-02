@@ -8,6 +8,7 @@ import { ServiceRequestCreate } from "./service-request-create";
 import { MyRequests } from "./my-requests";
 import { BeneficiaryDashboard } from "./dashboard";
 import { ContactOperator } from "./contact-operator";
+import { RequestDetails } from "./request-details";
 
 // Export wszystkich komponentów
 export { BeneficiaryDashboard } from "./dashboard";
@@ -25,9 +26,7 @@ export const AuditRequestEdit = () => {
   return <div>Audit Request Edit - do implementacji</div>;
 };
 
-export const RequestDetails = () => {
-  return <div>Request Details - do implementacji</div>;
-};
+
 
 // Resource definitions dla Refine
 export const beneficiaryResources = [
@@ -119,6 +118,12 @@ export const beneficiaryRoutes = [
   <Route
     key="audit-request-show"
     path="/beneficiary/audit-request/show/:id"
+    element={<RequestDetails />}
+  />,
+  // DODANY ROUTE do widoku szczegółów (naprawia problem z brakiem widoku)
+  <Route
+    key="request-details"
+    path="/beneficiary/requests/:id"
     element={<RequestDetails />}
   />,
 ];
