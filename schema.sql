@@ -20,21 +20,44 @@ created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 description TEXT                              
 );
-CREATE TABLE auditor_portfolios (               
+CREATE TABLE auditor_portfolio_items (          
 id UUID NOT NULL DEFAULT gen_random_uuid(),   
 auditor_id UUID NOT NULL,                     
-name_or_company TEXT NOT NULL,                
-certificate_data TEXT,                        
-description TEXT,                             
+title TEXT NOT NULL,                          
+location TEXT NOT NULL,                       
+postal_code TEXT,                             
+completion_date DATE,                         
+building_type TEXT,                           
+building_area NUMERIC,                        
+building_year INTEGER,                        
+description TEXT NOT NULL,                    
+scope_of_work TEXT,                           
+results_summary TEXT,                         
+energy_class_before TEXT,                     
+energy_class_after TEXT,                      
+main_image_url TEXT,                          
+additional_images TEXT[],                     
+is_featured BOOLEAN DEFAULT false,            
 created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
 );
-CREATE TABLE contractor_gallery (               
+CREATE TABLE auditor_profiles (                 
 id UUID NOT NULL DEFAULT gen_random_uuid(),   
-portfolio_id UUID NOT NULL,                   
-image_url TEXT NOT NULL,                      
-caption TEXT,                                 
-created_at TIMESTAMPTZ NOT NULL DEFAULT now() 
+auditor_id UUID NOT NULL,                     
+company_name TEXT NOT NULL,                   
+nip TEXT,                                     
+company_address TEXT,                         
+phone_number TEXT,                            
+email TEXT,                                   
+website_url TEXT,                             
+licenses TEXT,                                
+certifications TEXT,                          
+experience_years INTEGER,                     
+specializations TEXT[],                       
+description TEXT,                             
+is_active BOOLEAN NOT NULL DEFAULT true,      
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
 );
 CREATE TABLE contractor_offers (                
 id UUID NOT NULL DEFAULT gen_random_uuid(),   
@@ -46,6 +69,29 @@ status TEXT NOT NULL DEFAULT 'pending'::text,
 created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
 );
+CREATE TABLE contractor_portfolio_items (       
+id UUID NOT NULL DEFAULT gen_random_uuid(),   
+contractor_id UUID NOT NULL,                  
+title TEXT NOT NULL,                          
+location TEXT NOT NULL,                       
+postal_code TEXT,                             
+completion_date DATE,                         
+project_type TEXT,                            
+building_type TEXT,                           
+project_value NUMERIC,                        
+duration_days INTEGER,                        
+description TEXT NOT NULL,                    
+scope_of_work TEXT,                           
+technologies_used TEXT[],                     
+results_achieved TEXT,                        
+main_image_url TEXT,                          
+additional_images TEXT[],                     
+before_images TEXT[],                         
+after_images TEXT[],                          
+is_featured BOOLEAN DEFAULT false,            
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
+);
 CREATE TABLE contractor_portfolios (            
 id UUID NOT NULL DEFAULT gen_random_uuid(),   
 contractor_id UUID NOT NULL,                  
@@ -53,6 +99,24 @@ company_name TEXT NOT NULL,
 nip TEXT NOT NULL,                            
 company_address TEXT NOT NULL,                
 description TEXT,                             
+created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
+);
+CREATE TABLE contractor_profiles (              
+id UUID NOT NULL DEFAULT gen_random_uuid(),   
+contractor_id UUID NOT NULL,                  
+company_name TEXT NOT NULL,                   
+nip TEXT NOT NULL,                            
+company_address TEXT NOT NULL,                
+phone_number TEXT,                            
+email TEXT,                                   
+website_url TEXT,                             
+licenses TEXT,                                
+certifications TEXT,                          
+experience_years INTEGER,                     
+specializations TEXT[],                       
+description TEXT,                             
+is_active BOOLEAN NOT NULL DEFAULT true,      
 created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 updated_at TIMESTAMPTZ NOT NULL DEFAULT now() 
 );

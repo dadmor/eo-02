@@ -30,6 +30,12 @@ import {
   beneficiaryRoutes,
 } from "./pages/beneficiary";
 
+// Import zorganizowanych auditor exports
+import {
+  auditorResources,
+  auditorRoutes,
+} from "./pages/auditor";
+
 function App() {
   return (
     <BrowserRouter>
@@ -45,6 +51,8 @@ function App() {
           profileResource,
           // Dodaj beneficiary resources
           ...beneficiaryResources,
+          // Dodaj auditor resources
+          ...auditorResources,
         ]}
         options={{
           syncWithLocation: true,
@@ -83,6 +91,9 @@ function App() {
 
             {/* Beneficiary routes - używamy zorganizowanych routes */}
             {...beneficiaryRoutes}
+
+            {/* Auditor routes - używamy zorganizowanych routes */}
+            {...auditorRoutes}
 
             {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />
