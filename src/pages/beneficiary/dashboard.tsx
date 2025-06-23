@@ -6,11 +6,9 @@ import { FlexBox, GridBox } from "@/components/shared";
 import { Lead } from "@/components/reader";
 import { Badge, Button } from "@/components/ui";
 import { 
-  Plus, 
   FileText, 
   Clock, 
   CheckCircle, 
-  XCircle, 
   Wrench, 
   ClipboardCheck,
   TrendingUp,

@@ -54,8 +54,8 @@ export const beneficiaryResources = [
     },
   },
   {
-    name: "operator_contacts",
-    list: "/beneficiary/operator-contacts",
+    name: "contact_operator",
+    list: "/beneficiary/contact-operator",
     create: "/beneficiary/contact-operator",
     meta: {
       label: "Kontakt z operatorem",
@@ -89,11 +89,6 @@ export const beneficiaryRoutes = [
   <Route
     key="beneficiary-audit-requests"
     path="/beneficiary/audit-requests"
-    element={<MyRequests />}
-  />,
-  <Route
-    key="beneficiary-operator-contacts"
-    path="/beneficiary/operator-contacts"
     element={<MyRequests />}
   />,
   <Route
