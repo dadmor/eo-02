@@ -36,6 +36,12 @@ import {
   auditorRoutes,
 } from "./pages/auditor";
 
+// Import zorganizowanych contractor exports
+import {
+  contractorResources,
+  contractorRoutes,
+} from "./pages/contractor";
+
 function App() {
   return (
     <BrowserRouter>
@@ -53,6 +59,8 @@ function App() {
           ...beneficiaryResources,
           // Dodaj auditor resources
           ...auditorResources,
+          // Dodaj contractor resources
+          ...contractorResources,
         ]}
         options={{
           syncWithLocation: true,
@@ -94,6 +102,9 @@ function App() {
 
             {/* Auditor routes - używamy zorganizowanych routes */}
             {...auditorRoutes}
+
+            {/* Contractor routes - używamy zorganizowanych routes */}
+            {...contractorRoutes}
 
             {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />
