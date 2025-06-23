@@ -322,19 +322,7 @@ export const MyRequests = () => {
         </div>
       </FlexBox>
 
-      {/* Show warning if audit requests are still loading */}
-      {(loadingAR || loadingSR) && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
-          <div className="text-sm text-blue-800">
-            ℹ️ Status zapytań: 
-            Service Requests: {loadingSR ? 'ładowanie...' : 'gotowe'}
-            Audit Requests: {loadingAR ? 'ładowanie...' : 'gotowe'}
-            {errorSR && <div className="mt-1 text-red-600">Błąd SR: {JSON.stringify(errorSR)}</div>}
-            {errorAR && <div className="mt-1 text-red-600">Błąd AR: {JSON.stringify(errorAR)}</div>}
-          </div>
-        </div>
-      )}
-
+     
       <FlexBox>
         <div></div>
         <div className="flex gap-2">
