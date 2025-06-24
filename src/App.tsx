@@ -1,3 +1,4 @@
+// src/App.tsx
 import { Authenticated, ErrorComponent, Refine } from "@refinedev/core";
 import routerBindings, {
   CatchAllNavigate,
@@ -10,27 +11,15 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Layout } from "./components/layout";
 import { authProvider, supabaseClient } from "./utility";
 
-
 import { authRoutes } from "./pages/auth";
 
 
-// Import zorganizowanych beneficiary exports
-import {
-  beneficiaryResources,
-  beneficiaryRoutes,
-} from "./pages/beneficiary";
 
-// Import zorganizowanych auditor exports
+// Import zorganizowanych teacher exports
 import {
-  auditorResources,
-  auditorRoutes,
-} from "./pages/auditor";
-
-// Import zorganizowanych contractor exports
-import {
-  contractorResources,
-  contractorRoutes,
-} from "./pages/contractor";
+  teacherResources,
+  teacherRoutes,
+} from "./pages/teacher";
 
 function App() {
   return (
@@ -41,9 +30,7 @@ function App() {
         authProvider={authProvider}
         routerProvider={routerBindings}
         resources={[
-          ...beneficiaryResources,
-          ...auditorResources,
-          ...contractorResources,
+          ...teacherResources,
         ]}
         options={{
           syncWithLocation: true,
@@ -74,15 +61,10 @@ function App() {
               element={<NavigateToResource resource="campaigns" />}
             />
 
-          
-            {/* Beneficiary routes - używamy zorganizowanych routes */}
-            {...beneficiaryRoutes}
+           
 
-            {/* Auditor routes - używamy zorganizowanych routes */}
-            {...auditorRoutes}
-
-            {/* Contractor routes - używamy zorganizowanych routes */}
-            {...contractorRoutes}
+            {/* Teacher routes - używamy zorganizowanych routes */}
+            {...teacherRoutes}
 
             {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />
