@@ -24,6 +24,12 @@ import {
 import { profileResource, profileRoutes } from "./pages/profiles";
 import { authRoutes } from "./pages/auth";
 
+// Import kampanii
+import {
+  campaignResource,
+  campaignRoutes,
+} from "./pages/campaign";
+
 // Import zorganizowanych beneficiary exports
 import {
   beneficiaryResources,
@@ -55,6 +61,7 @@ function App() {
           marketingStrategyResource,
           googleAdsCampaignResource,
           profileResource,
+          campaignResource, // Dodany resource kampanii
           // Dodaj beneficiary resources
           ...beneficiaryResources,
           // Dodaj auditor resources
@@ -88,7 +95,7 @@ function App() {
             {/* Default redirect */}
             <Route
               index
-              element={<NavigateToResource resource="website_analyses" />}
+              element={<NavigateToResource resource="campaigns" />}
             />
 
             {/* Existing routes */}
@@ -96,6 +103,9 @@ function App() {
             {...marketingStrategyRoutes}
             {...googleAdsCampaignRoutes}
             {...profileRoutes}
+
+            {/* Campaign routes - dodane routes kampanii */}
+            {...campaignRoutes}
 
             {/* Beneficiary routes - używamy zorganizowanych routes */}
             {...beneficiaryRoutes}
