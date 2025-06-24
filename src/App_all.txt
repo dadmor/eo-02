@@ -9,10 +9,26 @@ import { dataProvider, liveProvider } from "@refinedev/supabase";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Layout } from "./components/layout";
 import { authProvider, supabaseClient } from "./utility";
-
-
+import {
+  websiteAnalysisResource,
+  websiteAnalysisRoutes,
+} from "./pages/website-analyses";
+import {
+  marketingStrategyResource,
+  marketingStrategyRoutes,
+} from "./pages/marketing-strategies";
+import {
+  googleAdsCampaignResource,
+  googleAdsCampaignRoutes,
+} from "./pages/google-ads-campaigns";
+import { profileResource, profileRoutes } from "./pages/profiles";
 import { authRoutes } from "./pages/auth";
 
+// Import kampanii
+import {
+  campaignResource,
+  campaignRoutes,
+} from "./pages/campaign";
 
 // Import zorganizowanych beneficiary exports
 import {
@@ -41,8 +57,16 @@ function App() {
         authProvider={authProvider}
         routerProvider={routerBindings}
         resources={[
+          websiteAnalysisResource,
+          marketingStrategyResource,
+          googleAdsCampaignResource,
+          profileResource,
+          campaignResource, // Dodany resource kampanii
+          // Dodaj beneficiary resources
           ...beneficiaryResources,
+          // Dodaj auditor resources
           ...auditorResources,
+          // Dodaj contractor resources
           ...contractorResources,
         ]}
         options={{
@@ -74,7 +98,15 @@ function App() {
               element={<NavigateToResource resource="campaigns" />}
             />
 
-          
+            {/* Existing routes */}
+            {...websiteAnalysisRoutes}
+            {...marketingStrategyRoutes}
+            {...googleAdsCampaignRoutes}
+            {...profileRoutes}
+
+            {/* Campaign routes - dodane routes kampanii */}
+            {...campaignRoutes}
+
             {/* Beneficiary routes - używamy zorganizowanych routes */}
             {...beneficiaryRoutes}
 
