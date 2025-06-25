@@ -25,12 +25,13 @@ import {
   Briefcase
 } from "lucide-react";
 import { useState } from "react";
+import { Identity } from "../operatorTypes";
 
 export const AuditorProfile = () => {
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
 
   const { mutate: createProfile } = useCreate();

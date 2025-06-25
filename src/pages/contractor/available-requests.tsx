@@ -26,6 +26,7 @@ import {
   Wind
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const ContractorAvailableRequests = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export const ContractorAvailableRequests = () => {
   const [heatSourceFilter, setHeatSourceFilter] = useState("");
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   // Pobranie dostępnych zleceń serwisowych

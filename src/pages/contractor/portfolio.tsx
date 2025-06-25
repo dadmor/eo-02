@@ -29,6 +29,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const ContractorPortfolio = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ export const ContractorPortfolio = () => {
   const [typeFilter, setTypeFilter] = useState("");
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   const { mutate: deleteItem } = useDelete();

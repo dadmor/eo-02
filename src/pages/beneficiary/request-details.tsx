@@ -3,10 +3,11 @@ import { useParams } from "react-router-dom";
 import { useGetIdentity, useOne } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, MapPin, Calendar, Loader2 } from "lucide-react";
+import { Identity } from "../operatorTypes";
 
 export const RequestDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
 
   // Spróbuj najpierw pobrać jako zlecenie wykonawcy

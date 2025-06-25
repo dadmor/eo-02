@@ -23,12 +23,13 @@ import {
   Image
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const AuditorDashboard = () => {
   const navigate = useNavigate();
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   // Pobranie dostępnych zleceń
@@ -187,7 +188,7 @@ export const AuditorDashboard = () => {
       )}
 
       {/* Statystyki */}
-      <GridBox variant="1-2-5">
+      <GridBox variant="1-2-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -236,17 +237,7 @@ export const AuditorDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <Image className="w-8 h-8 text-orange-600" />
-              <div>
-                <div className="text-2xl font-bold">{stats.portfolio}</div>
-                <div className="text-sm text-muted-foreground">Projektów w portfolio</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </GridBox>
 
       <GridBox>

@@ -12,24 +12,22 @@ import {
   FileText, 
   Clock, 
   CheckCircle, 
-  ClipboardCheck,
-  TrendingUp,
   Eye,
   Star,
   Euro,
   Calendar,
-  Users,
   User,
   Image,
   Hammer
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const ContractorDashboard = () => {
   const navigate = useNavigate();
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   // Pobranie dostępnych zleceń serwisowych
@@ -188,7 +186,7 @@ export const ContractorDashboard = () => {
       )}
 
       {/* Statystyki */}
-      <GridBox variant="1-2-5">
+      <GridBox variant="1-2-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">

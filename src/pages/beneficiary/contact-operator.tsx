@@ -1,17 +1,20 @@
 // src/pages/beneficiary/contact-operator.tsx
 import { useState } from "react";
 import { useForm } from "@refinedev/react-hook-form";
-import { useNavigation } from "@refinedev/core";
+import { useNavigation, useCreate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Calculator, Phone, MapPin, Users, Euro, AlertCircle } from "lucide-react";
 import { Button, Input, Label } from "@/components/ui";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Identity } from "../operatorTypes";
 
 export const ContactOperator = () => {
   const { list } = useNavigation();
-  const { data: identity, isLoading: identityLoading } = useGetIdentity();
+  const { mutate: createContact } = useCreate();
+
+  const { data: identity, isLoading: identityLoading } = useGetIdentity<Identity>();
   const userId = identity?.id;
 
   // Calculator state
@@ -21,13 +24,10 @@ export const ContactOperator = () => {
   const [calculatorResult, setCalculatorResult] = useState<any>(null);
 
   const {
-    refineCore: { onFinish },
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resource: "operator_contacts",
-  });
+  } = useForm();
 
   // Kalkulator dotacji (uproszczona logika)
   const calculateSubsidy = () => {
@@ -74,13 +74,18 @@ export const ContactOperator = () => {
       subsidyPercentage,
       maxAmount,
       incomePercentage: Math.round(incomePercentage),
-      threshold
+      threshold,
+      householdMembers,
+      householdIncome,
+      allOwnersAlive,
+      calculatedAt: new Date().toISOString()
     });
   };
 
   const handleContactSubmit = (data: any) => {
     console.log("Submitting form with data:", data);
     console.log("User ID:", userId);
+    console.log("Calculator result:", calculatorResult);
     
     if (!userId) {
       console.error("User not authenticated");
@@ -88,15 +93,59 @@ export const ContactOperator = () => {
       return;
     }
     
+    // Ensure all required fields are present and properly formatted
     const formData = {
-      ...data,
       beneficiary_id: userId,
-      calculator_result: calculatorResult,
+      postal_code: data.postal_code?.trim(),
+      city: data.city?.trim(),
+      phone_number: data.phone_number?.trim(),
+      message: data.message?.trim() || null,
+      contact_type: "calculator",
       status: "pending",
+      // Convert calculator_result to JSON string if it exists
+      calculator_result: calculatorResult ? JSON.stringify(calculatorResult) : null,
     };
     
+    // Validate required fields
+    if (!formData.postal_code || !formData.city || !formData.phone_number) {
+      alert("Wszystkie wymagane pola muszą być wypełnione");
+      return;
+    }
+    
     console.log("Final form data:", formData);
-    onFinish(formData);
+    
+    createContact(
+      {
+        resource: "operator_contacts",
+        values: formData,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("Contact created successfully:", data);
+          alert("Zgłoszenie zostało wysłane pomyślnie!");
+          list("beneficiary/dashboard");
+        },
+        onError: (error) => {
+          console.error("Error creating contact:", error);
+          console.error("Error details:", {
+            message: error.message,
+            response: error.response,
+            data: error.response?.data
+          });
+          
+          // More specific error messages
+          if (error.response?.status === 400) {
+            alert("Błąd: Nieprawidłowe dane formularza. Sprawdź wszystkie pola.");
+          } else if (error.response?.status === 401) {
+            alert("Błąd: Nie jesteś zalogowany. Odśwież stronę i spróbuj ponownie.");
+          } else if (error.response?.status === 403) {
+            alert("Błąd: Brak uprawnień do wykonania tej operacji.");
+          } else {
+            alert(`Błąd podczas wysyłania zgłoszenia: ${error.message || 'Nieznany błąd'}`);
+          }
+        },
+      }
+    );
   };
 
   // Show loading state while identity is loading
@@ -133,9 +182,9 @@ export const ContactOperator = () => {
             variant="outline"
             size="sm"
             onClick={() => {
-              console.log("Navigating back to operator contacts list");
+              console.log("Navigating back to dashboard");
               try {
-                list("operator_contacts");
+                list("beneficiary/dashboard");
               } catch (error) {
                 console.error("Navigation error:", error);
                 // Fallback navigation
@@ -273,6 +322,10 @@ export const ContactOperator = () => {
                   placeholder="00-000"
                   {...register("postal_code", {
                     required: "Kod pocztowy jest wymagany",
+                    pattern: {
+                      value: /^\d{2}-\d{3}$/,
+                      message: "Kod pocztowy musi być w formacie XX-XXX"
+                    }
                   })}
                 />
                 {errors.postal_code && (
@@ -289,6 +342,10 @@ export const ContactOperator = () => {
                   placeholder="Warszawa"
                   {...register("city", {
                     required: "Miejscowość jest wymagana",
+                    minLength: {
+                      value: 2,
+                      message: "Miejscowość musi mieć co najmniej 2 znaki"
+                    }
                   })}
                 />
                 {errors.city && (
@@ -311,6 +368,10 @@ export const ContactOperator = () => {
                   placeholder="+48 123 456 789"
                   {...register("phone_number", {
                     required: "Numer telefonu jest wymagany",
+                    pattern: {
+                      value: /^[\+]?[\d\s\-\(\)]{9,15}$/,
+                      message: "Nieprawidłowy format numeru telefonu"
+                    }
                   })}
                 />
                 {errors.phone_number && (
@@ -318,6 +379,16 @@ export const ContactOperator = () => {
                     {errors.phone_number.message as string}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="message">Wiadomość (opcjonalna)</Label>
+                <textarea
+                  id="message"
+                  className="w-full min-h-[80px] px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-input bg-background rounded-md"
+                  placeholder="Dodatkowe informacje lub pytania..."
+                  {...register("message")}
+                />
               </div>
 
               {calculatorResult && (
@@ -338,7 +409,7 @@ export const ContactOperator = () => {
                   onClick={() => {
                     console.log("Cancel button clicked");
                     try {
-                      list("operator_contacts");
+                      list("beneficiary/dashboard");
                     } catch (error) {
                       console.error("Navigation error:", error);
                       window.history.back();

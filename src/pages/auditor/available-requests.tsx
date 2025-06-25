@@ -23,6 +23,7 @@ import {
   Phone
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const AvailableRequests = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export const AvailableRequests = () => {
   const [cityFilter, setCityFilter] = useState("");
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   // Pobranie dostępnych zleceń

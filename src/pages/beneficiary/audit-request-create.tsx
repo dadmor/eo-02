@@ -7,14 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Home, MapPin, Phone, ClipboardCheck, Building, Calendar, Square } from "lucide-react";
 import { Button, Input, Label } from "@/components/ui";
+import { Identity } from "../operatorTypes";
 
 export const AuditRequestCreate = () => {
   const { list } = useNavigation();
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
-
+  
   const {
     refineCore: { onFinish },
     register,

@@ -23,10 +23,10 @@ import {
   Trash2,
   Star,
   MessageSquare,
-  Users,
   Building
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const MyRequests = () => {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export const MyRequests = () => {
   const [reviewData, setReviewData] = useState({ rating: 5, comment: "" });
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   const { mutate: deleteRequest } = useDelete();

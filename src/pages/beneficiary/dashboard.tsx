@@ -17,10 +17,7 @@ import {
   Calculator
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-type Identity = {
-  id: string;
-};
+import { Identity } from "../operatorTypes";
 
 export const BeneficiaryDashboard = () => {
   const navigate = useNavigate();
@@ -93,7 +90,20 @@ export const BeneficiaryDashboard = () => {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);
 
-  const hasCalculatorResult = contacts.some(c => c.calculator_result);
+  // Check for calculator result with better validation
+  const hasCalculatorResult = contacts.some(c => {
+    if (!c.calculator_result) return false;
+    
+    try {
+      const result = typeof c.calculator_result === 'string' 
+        ? JSON.parse(c.calculator_result)
+        : c.calculator_result;
+      
+      return result && result.subsidyLevel && result.subsidyPercentage && result.maxAmount;
+    } catch {
+      return false;
+    }
+  });
 
   // Show loading state if user identity is not loaded yet
   if (!userId) {
@@ -250,7 +260,31 @@ export const BeneficiaryDashboard = () => {
                   
                   if (!latestContact?.calculator_result) return null;
                   
-                  const result = latestContact.calculator_result;
+                  // Parse calculator_result if it's a string, otherwise use as object
+                  let result;
+                  try {
+                    result = typeof latestContact.calculator_result === 'string' 
+                      ? JSON.parse(latestContact.calculator_result)
+                      : latestContact.calculator_result;
+                  } catch (error) {
+                    console.error('Error parsing calculator_result:', error);
+                    return (
+                      <div className="text-sm text-red-500">
+                        Błąd podczas odczytywania wyniku kalkulatora
+                      </div>
+                    );
+                  }
+                  
+                  // Validate required fields
+                  if (!result || !result.subsidyLevel || !result.subsidyPercentage || !result.maxAmount) {
+                    console.warn('Invalid calculator result structure:', result);
+                    return (
+                      <div className="text-sm text-muted-foreground">
+                        Niepełne dane kalkulatora
+                      </div>
+                    );
+                  }
+                  
                   return (
                     <div className="space-y-2">
                       <div className="text-sm text-muted-foreground">
@@ -260,7 +294,15 @@ export const BeneficiaryDashboard = () => {
                         {result.subsidyPercentage}%
                       </div>
                       <div className="text-sm">
-                        do {result.maxAmount?.toLocaleString()} zł
+                        do {result.maxAmount?.toLocaleString('pl-PL')} zł
+                      </div>
+                      {result.incomePercentage && (
+                        <div className="text-xs text-muted-foreground">
+                          Twój dochód: {result.incomePercentage}% progu
+                        </div>
+                      )}
+                      <div className="text-xs text-muted-foreground">
+                        Obliczono: {new Date(latestContact.created_at).toLocaleDateString('pl-PL')}
                       </div>
                       <Button 
                         variant="outline" 

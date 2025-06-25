@@ -17,12 +17,13 @@ import {
   CheckCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const CompletedAudits = () => {
   const navigate = useNavigate();
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   // Pobranie ukończonych ofert

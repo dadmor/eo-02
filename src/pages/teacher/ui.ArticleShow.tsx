@@ -65,6 +65,12 @@ export default function ArticleShow() {
   }
 
   const handleDelete = () => {
+    // Sprawdź czy article i article.id istnieją
+    if (!article?.id) {
+      console.error("Nie można usunąć artykułu - brak ID");
+      return;
+    }
+
     if (confirm("Czy na pewno chcesz usunąć ten artykuł? Ta akcja jest nieodwracalna.")) {
       deleteArticle({
         resource: "articles",
@@ -75,6 +81,22 @@ export default function ArticleShow() {
         },
       });
     }
+  };
+
+  const handleEdit = () => {
+    if (!article?.id) {
+      console.error("Nie można edytować artykułu - brak ID");
+      return;
+    }
+    edit("articles", article.id);
+  };
+
+  const handleEditLesson = () => {
+    if (!lesson?.id) {
+      console.error("Nie można edytować lekcji - brak ID");
+      return;
+    }
+    edit("lessons", lesson.id);
   };
 
   return (
@@ -96,11 +118,19 @@ export default function ArticleShow() {
         </div>
         
         <div className="flex items-center space-x-2">
-          <Button variant="outline" onClick={() => edit("articles", article.id)}>
+          <Button 
+            variant="outline" 
+            onClick={handleEdit}
+            disabled={!article?.id}
+          >
             <Edit className="w-4 h-4 mr-2" />
             Edytuj
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button 
+            variant="destructive" 
+            onClick={handleDelete}
+            disabled={!article?.id}
+          >
             <Trash2 className="w-4 h-4 mr-2" />
             Usuń
           </Button>
@@ -122,7 +152,7 @@ export default function ArticleShow() {
               <CardTitle className="text-2xl">{article.title}</CardTitle>
             </div>
             <Badge variant="secondary">
-              ID: {article.id.slice(0, 8)}
+              ID: {article.id?.toString().slice(0, 8) || 'N/A'}
             </Badge>
           </div>
         </CardHeader>
@@ -156,13 +186,13 @@ export default function ArticleShow() {
                 Utworzony
               </div>
               <div className="text-sm text-muted-foreground">
-                {new Date(article.created_at).toLocaleDateString('pl-PL', {
+                {article.created_at ? new Date(article.created_at).toLocaleDateString('pl-PL', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                   hour: '2-digit',
                   minute: '2-digit'
-                })}
+                }) : 'Nie określono'}
               </div>
             </div>
 
@@ -297,7 +327,12 @@ export default function ArticleShow() {
               <span className="text-sm text-muted-foreground">
                 Kolejność w lekcji: {article.sort_order || 'Nie ustawiono'}
               </span>
-              <Button variant="outline" size="sm" onClick={() => edit("lessons", lesson.id)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleEditLesson}
+                disabled={!lesson?.id}
+              >
                 <Edit className="w-4 h-4 mr-2" />
                 Edytuj lekcję
               </Button>

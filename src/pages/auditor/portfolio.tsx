@@ -26,6 +26,7 @@ import {
   Search
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const AuditorPortfolio = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export const AuditorPortfolio = () => {
   const [typeFilter, setTypeFilter] = useState("");
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   const { mutate: deleteItem } = useDelete();

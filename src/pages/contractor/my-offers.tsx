@@ -17,12 +17,12 @@ import {
   Eye,
   Calendar,
   Euro,
-  MapPin,
   Edit,
   X,
   Hammer
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Identity } from "../operatorTypes";
 
 export const ContractorMyOffers = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export const ContractorMyOffers = () => {
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
   
   const { mutate: updateOffer } = useUpdate();
