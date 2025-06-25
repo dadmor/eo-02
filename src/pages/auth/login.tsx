@@ -1,93 +1,196 @@
+// LoginPage.tsx - Ulepszona wersja z lepszą obsługą błędów
 import React from 'react';
-import { useLogin } from '@refinedev/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, Info, Mail, Lock } from 'lucide-react';
 import { NarrowCol } from '@/components/layout/NarrowCol';
 import { Lead } from '@/components/reader';
+import { useLoginForm } from '@/utility/useLoginForm'; // Import custom hook
 
 export const LoginPage: React.FC = () => {
-  const { mutate: login, isLoading, error } = useLogin();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const {
+    email,
+    password,
+    setEmail,
+    setPassword,
+    isLoading,
+    error,
+    rawError,
+    handleSubmit
+  } = useLoginForm();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    login({ email, password });
+  // Funkcja sprawdzająca czy formularz jest prawidłowy
+  const isFormValid = email.trim().length > 0 && password.length > 0;
+
+  // Sprawdzenie typu błędu dla lepszego UX
+  const getErrorVariant = (error: string) => {
+    if (error.includes("nie zostało potwierdzone")) {
+      return "warning"; // Żółty dla błędów z potwierdzeniem
+    }
+    return "destructive"; // Czerwony dla innych błędów
+  };
+
+  const getErrorIcon = (error: string) => {
+    if (error.includes("nie zostało potwierdzone")) {
+      return Info;
+    }
+    return AlertTriangle;
   };
 
   return (
     <NarrowCol>
-      <Lead title={`Logowanie`} description={`...`} />
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
-            <CardDescription className="text-center">
-              Wprowadź swoje dane aby się zalogować
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="przykład@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Hasło</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Wprowadź hasło"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    {error.message || 'Błąd logowania'}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <Button 
-                type="submit" 
-                className="w-full" 
+      <Lead title={`Logowanie`} description={`Wprowadź swoje dane aby kontynuować`} />
+      
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
+          <CardDescription className="text-center">
+            Wprowadź swoje dane aby się zalogować
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center">
+                <Mail className="mr-2 h-4 w-4" />
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="przykład@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Zaloguj się
-              </Button>
-            </form>
+                required
+                className={error && error.includes("email") ? "border-red-500" : ""}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password" className="flex items-center">
+                <Lock className="mr-2 h-4 w-4" />
+                Hasło
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Wprowadź hasło"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                required
+                className={error && error.includes("hasło") ? "border-red-500" : ""}
+              />
+            </div>
 
-            <div className="mt-4 text-center text-sm">
-              <a href="/register/step1" className="text-blue-600 hover:text-blue-500">
+            {/* Wyświetlanie błędów */}
+            {error && (
+              <Alert variant={getErrorVariant(error) as any}>
+                {React.createElement(getErrorIcon(error), { className: "h-4 w-4" })}
+                <AlertDescription>
+                  <strong>Błąd logowania:</strong> {error}
+                  
+                  {/* Dodatkowe wskazówki w zależności od typu błędu */}
+                  {error.includes("nie zostało potwierdzone") && (
+                    <div className="mt-2 text-sm">
+                      <p>💡 <strong>Co robić:</strong></p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Sprawdź swoją skrzynkę email (także spam)</li>
+                        <li>Kliknij link aktywacyjny w emailu</li>
+                        <li>Jeśli nie otrzymałeś emaila, możesz <a href="/resend-confirmation" className="underline">wysłać ponownie</a></li>
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {error.includes("Nieprawidłowe dane") && (
+                    <div className="mt-2 text-sm">
+                      <p>💡 <strong>Sprawdź:</strong></p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Czy email jest wpisany poprawnie</li>
+                        <li>Czy hasło jest poprawne (uwaga na wielkość liter)</li>
+                        <li>Czy masz już założone konto</li>
+                      </ul>
+                    </div>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading || !isFormValid}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading ? "Logowanie..." : "Zaloguj się"}
+            </Button>
+          </form>
+
+          {/* Linki pomocnicze */}
+          <div className="mt-6 space-y-3">
+            <div className="text-center text-sm">
+              <a 
+                href="/register/step1" 
+                className="text-blue-600 hover:text-blue-500 font-medium"
+              >
                 Nie masz konta? Zarejestruj się
               </a>
             </div>
             
-            <div className="mt-2 text-center text-sm">
-              <a href="/forgot-password" className="text-blue-600 hover:text-blue-500">
+            <div className="text-center text-sm">
+              <a 
+                href="/forgot-password" 
+                className="text-blue-600 hover:text-blue-500"
+              >
                 Zapomniałeś hasła?
               </a>
             </div>
-          </CardContent>
-        </Card>
-     </NarrowCol>
+
+            {/* Dodatkowa pomoc */}
+            <div className="border-t pt-4 mt-4">
+              <div className="text-center text-xs text-gray-500">
+                <p>Problemy z logowaniem?</p>
+                <a href="/contact" className="text-blue-600 hover:text-blue-500">
+                  Skontaktuj się z pomocą techniczną
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Debug info - tylko development */}
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-xs text-gray-500">
+                Debug: Stan hooka
+              </summary>
+              <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto space-y-2">
+                <div>
+                  <strong>Hook state:</strong>
+                  <pre>{JSON.stringify({ 
+                    isLoading, 
+                    hasError: !!error, 
+                    hasRawError: !!rawError,
+                    errorMessage: error,
+                    email: email ? "***" : "", 
+                    password: password ? "***" : "" 
+                  }, null, 2)}</pre>
+                </div>
+                {rawError && (
+                  <div>
+                    <strong>Raw error object:</strong>
+                    <pre>{JSON.stringify(rawError, null, 2)}</pre>
+                  </div>
+                )}
+              </div>
+            </details>
+          )}
+        </CardContent>
+      </Card>
+    </NarrowCol>
   );
 };

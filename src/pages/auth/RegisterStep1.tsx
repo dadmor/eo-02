@@ -1,4 +1,4 @@
-// pages/RegisterStep1.tsx
+// RegisterStep1.tsx - POPRAWIONE
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
 import { SchemaForm } from "@/components/SchemaForm";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 export const RegisterStep1: React.FC = () => {
   const navigate = useNavigate();
-  const { register } = useFormSchemaStore();
+  const { register, setData } = useFormSchemaStore(); // ✅ Dodano setData
 
   useEffect(() => {
     register({
@@ -73,6 +73,9 @@ export const RegisterStep1: React.FC = () => {
   }, [register]);
 
   const handleSubmit = (data: any) => {
+    console.log("RegisterStep1 - Zapisuję dane:", data);
+    // ✅ ZAPISZ DANE DO STORE'A
+    setData("registration", data);
     navigate("/register/step2");
   };
 

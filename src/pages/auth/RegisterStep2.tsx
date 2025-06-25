@@ -1,4 +1,4 @@
-// pages/RegisterStep2.tsx
+// RegisterStep2.tsx - POPRAWIONE
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,14 @@ import { ArrowLeft } from "lucide-react";
 import { SchemaForm } from "@/components/SchemaForm";
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
+import { useFormSchemaStore } from "@/utility/formSchemaStore"; // ✅ Dodano import
 
 export const RegisterStep2: React.FC = () => {
   const navigate = useNavigate();
+  const { setData } = useFormSchemaStore(); // ✅ Dodano setData
 
   const handleSubmit = (data: any) => {
+    setData("registration", data);
     navigate("/register/step3");
   };
 

@@ -61,6 +61,8 @@ export const authProvider: AuthBindings = {
   },
   register: async ({ email, password, role }) => {
     try {
+      console.log("🔄 Rozpoczynam rejestrację dla:", email);
+      
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
@@ -71,33 +73,62 @@ export const authProvider: AuthBindings = {
         },
       });
 
+      // ✅ NAJPIERW sprawdź błąd - to jest kluczowe!
       if (error) {
+        console.error("❌ Supabase registration error:", error);
+        
+        // ✅ WAŻNE: Zawsze zwróć success: false przy błędzie!
         return {
           success: false,
-          error,
+          error: {
+            message: error.message,
+            name: error.name || "Registration Error",
+            // ✅ Dodaj wszystkie szczegóły błędu
+            details: error
+          },
         };
       }
 
-      if (data) {
+      // ✅ Sprawdź czy użytkownik został utworzony
+      if (data?.user) {
+        console.log("✅ Użytkownik utworzony:", data.user.email);
+        
+        // ✅ Sprawdź czy email wymaga potwierdzenia
+        if (data.user && !data.user.email_confirmed_at) {
+          console.log("📧 Email wymaga potwierdzenia");
+        }
+        
         return {
           success: true,
-          redirectTo: "/",
+          // ✅ Zwróć dodatkowe informacje o użytkowniku
+          user: data.user,
+          session: data.session
         };
       }
-    } catch (error: any) {
+
+      // ✅ Fallback jeśli coś poszło nie tak
+      console.error("❌ Brak danych użytkownika w odpowiedzi");
       return {
         success: false,
-        error,
+        error: {
+          message: "Registration failed - no user data returned",
+          name: "Registration Error",
+        },
+      };
+
+    } catch (error: any) {
+      console.error("❌ Registration catch error:", error);
+      
+      // ✅ Upewnij się że błąd jest zawsze zwracany jako success: false
+      return {
+        success: false,
+        error: {
+          message: error.message || "Registration failed",
+          name: error.name || "Network Error",
+          details: error
+        },
       };
     }
-
-    return {
-      success: false,
-      error: {
-        message: "Register failed",
-        name: "Invalid email or password",
-      },
-    };
   },
   forgotPassword: async ({ email }) => {
     try {
@@ -241,5 +272,3 @@ export const authProvider: AuthBindings = {
     return null;
   },
 };
-
-
