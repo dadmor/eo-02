@@ -25,7 +25,10 @@ export const RegisterStep3: React.FC = () => {
   };
 
   const getRoleLabel = (role: string) => {
-    return role === "auditor" ? "Auditor" : "Beneficiary";
+    return role === "auditor" ? "Auditor" : 
+           role === "beneficiary" ? "Beneficjent" : 
+           role === "contractor" ? "Wykonawca" : 
+           "Nieznana rola";
   };
 
   // Check if data exists

@@ -1,7 +1,3 @@
-// ========================================
-// src/pages/contractor/profile.tsx
-// ========================================
-
 import { useForm } from "@refinedev/react-hook-form";
 import { useList, useCreate, useUpdate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
@@ -24,14 +20,16 @@ import {
   Briefcase,
   Hammer
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Identity } from "../operatorTypes";
 
 export const ContractorProfile = () => {
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
   
   // Get authenticated user
-  const { data: identity } = useGetIdentity();
+  const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
+  
 
   const { mutate: createProfile } = useCreate();
   const { mutate: updateProfile } = useUpdate();
@@ -54,6 +52,13 @@ export const ContractorProfile = () => {
 
   const existingProfile = profile?.data?.[0];
 
+  // Initialize specializations when profile data is loaded
+  useEffect(() => {
+    if (existingProfile?.specializations) {
+      setSelectedSpecializations(existingProfile.specializations);
+    }
+  }, [existingProfile]);
+
   const {
     register,
     handleSubmit,
@@ -71,7 +76,10 @@ export const ContractorProfile = () => {
       certifications: existingProfile.certifications,
       experience_years: existingProfile.experience_years,
       description: existingProfile.description,
-    } : {},
+      specializations: existingProfile.specializations || [], // Add this line
+    } : {
+      specializations: [], // Add this line for new profiles
+    },
   });
 
   const specializationOptions = [
@@ -345,6 +353,12 @@ export const ContractorProfile = () => {
                       <p className="text-xs text-muted-foreground">
                         Kliknij na specjalizacje, aby je wybrać
                       </p>
+                      {/* Hidden input to register specializations field */}
+                      <input
+                        type="hidden"
+                        {...register("specializations")}
+                        value={JSON.stringify(selectedSpecializations)}
+                      />
                     </div>
                   </div>
                 </div>

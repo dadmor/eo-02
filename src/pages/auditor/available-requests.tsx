@@ -28,7 +28,7 @@ import { Identity } from "../operatorTypes";
 export const AvailableRequests = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("all");
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -82,7 +82,7 @@ export const AvailableRequests = () => {
       request.street_address.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.postal_code.includes(searchTerm);
     
-    const matchesCity = !cityFilter || request.city === cityFilter;
+    const matchesCity = cityFilter === "all" || request.city === cityFilter;
     
     return matchesSearch && matchesCity;
   });
@@ -160,7 +160,7 @@ export const AvailableRequests = () => {
                 <SelectValue placeholder="Wszystkie miasta" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Wszystkie miasta</SelectItem>
+                <SelectItem value="all">Wszystkie miasta</SelectItem>
                 {uniqueCities.map(city => (
                   <SelectItem key={city} value={city}>{city}</SelectItem>
                 ))}
@@ -170,7 +170,7 @@ export const AvailableRequests = () => {
               variant="outline" 
               onClick={() => {
                 setSearchTerm("");
-                setCityFilter("");
+                setCityFilter("all");
               }}
             >
               Wyczyść
@@ -274,10 +274,10 @@ export const AvailableRequests = () => {
             <CardContent className="text-center py-12">
               <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-lg font-medium mb-2">
-                {searchTerm || cityFilter ? "Brak wyników" : "Brak dostępnych zleceń"}
+                {searchTerm || cityFilter !== "all" ? "Brak wyników" : "Brak dostępnych zleceń"}
               </h3>
               <p className="text-muted-foreground">
-                {searchTerm || cityFilter 
+                {searchTerm || cityFilter !== "all"
                   ? "Spróbuj zmienić kryteria wyszukiwania"
                   : "Sprawdź ponownie później, aby zobaczyć nowe zlecenia"
                 }

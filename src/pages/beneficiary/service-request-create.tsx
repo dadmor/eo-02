@@ -1,6 +1,6 @@
 // src/pages/beneficiary/service-request-create.tsx
 import { useForm } from "@refinedev/react-hook-form";
-import { useNavigation } from "@refinedev/core";
+import { useNavigation, useCreate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,15 +16,15 @@ export const ServiceRequestCreate = () => {
   const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
 
+  // Use the create mutation directly
+  const { mutate: createServiceRequest, isLoading: isSubmitting } = useCreate();
+
   const {
-    refineCore: { onFinish },
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resource: "service_requests",
-  });
+    formState: { errors },
+  } = useForm();
 
   const handleFormSubmit = (data: any) => {
     if (!userId) {
@@ -37,7 +37,18 @@ export const ServiceRequestCreate = () => {
       beneficiary_id: userId,
       status: "pending",
     };
-    onFinish(formData);
+
+    createServiceRequest(
+      {
+        resource: "service_requests",
+        values: formData,
+      },
+      {
+        onSuccess: () => {
+          list("service_requests");
+        },
+      }
+    );
   };
 
   // Show loading state if user identity is not loaded yet
@@ -273,7 +284,7 @@ export const ServiceRequestCreate = () => {
               </div>
             </div>
 
-            {/* Audyt efektywności - REMOVED TEXTAREA, ONLY FILE URL */}
+            {/* Audyt efektywności */}
             <div className="border-t pt-6">
               <h3 className="text-lg font-medium mb-4">
                 <div className="flex items-center gap-2">
@@ -299,8 +310,6 @@ export const ServiceRequestCreate = () => {
                 </p>
               </div>
             </div>
-
-            {/* Notes field - this doesn't exist in schema either, so removing it */}
 
             <div className="flex justify-end space-x-4 pt-6 border-t">
               <Button

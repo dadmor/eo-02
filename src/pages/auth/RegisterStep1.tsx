@@ -31,9 +31,10 @@ export const RegisterStep1: React.FC = () => {
               options: [
                 {
                   value: "beneficiary",
-                  label: "Beneficiary - Użytkownik końcowy",
+                  label: "Beneficjent - zakładajacy zlecenie",
                 },
-                { value: "auditor", label: "Auditor - Audytor systemu" },
+                { value: "auditor", label: "Auditor - opiniujacy zlecenie" },
+                { value: "contractor", label: "Wykonawca - realizujacy zlecenie" },
               ],
             },
           },
