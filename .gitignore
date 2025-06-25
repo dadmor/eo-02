@@ -2,7 +2,7 @@
 node_modules
 dist
 assets
-public
+
 
 # Editor directories and files
 .env
