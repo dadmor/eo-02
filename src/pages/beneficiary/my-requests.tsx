@@ -28,10 +28,46 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { Identity } from "../operatorTypes";
 
+// Type definitions
+interface BaseRequest {
+  id: string;
+  beneficiary_id: string;
+  city: string;
+  street_address: string;
+  postal_code: string;
+  created_at: string;
+  status: 'pending' | 'verified' | 'completed' | 'rejected';
+  review_rating?: number;
+  review_comment?: string;
+}
+
+interface ServiceRequest extends BaseRequest {
+  heat_source?: string;
+  windows_count: number;
+  doors_count: number;
+  wall_insulation_m2: number;
+}
+
+interface AuditRequest extends BaseRequest {
+  building_type?: string;
+  building_year?: number;
+  living_area?: number;
+}
+
+interface ServiceRequestWithType extends ServiceRequest {
+  type: 'service';
+}
+
+interface AuditRequestWithType extends AuditRequest {
+  type: 'audit';
+}
+
+type RequestWithType = ServiceRequestWithType | AuditRequestWithType;
+
 export const MyRequests = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RequestWithType | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [reviewData, setReviewData] = useState({ rating: 5, comment: "" });
@@ -122,22 +158,22 @@ export const MyRequests = () => {
   const offersList = offers?.data || []; // Will be empty array since query is disabled
   
   // Filter based on current view
-  let filteredRequests = [];
+  let filteredRequests: RequestWithType[] = [];
   
   if (requestType === 'service') {
-    filteredRequests = serviceReqs.map(r => ({ ...r, type: 'service' as const }));
+    filteredRequests = (serviceReqs as ServiceRequest[]).map(r => ({ ...r, type: 'service' as const }));
   } else if (requestType === 'audit') {
-    filteredRequests = auditReqs.map(r => ({ ...r, type: 'audit' as const }));
+    filteredRequests = (auditReqs as AuditRequest[]).map(r => ({ ...r, type: 'audit' as const }));
   } else {
     // All requests
     filteredRequests = [
-      ...serviceReqs.map(r => ({ ...r, type: 'service' as const })),
-      ...auditReqs.map(r => ({ ...r, type: 'audit' as const })),
+      ...(serviceReqs as ServiceRequest[]).map(r => ({ ...r, type: 'service' as const })),
+      ...(auditReqs as AuditRequest[]).map(r => ({ ...r, type: 'audit' as const })),
     ];
   }
   
   // Sort by creation date
-  const allRequests = filteredRequests.sort(
+  const allRequests: RequestWithType[] = filteredRequests.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
@@ -183,22 +219,22 @@ export const MyRequests = () => {
     }
   };
 
-  const canEdit = (request: any) => {
+  const canEdit = (request: RequestWithType) => {
     return request.status === 'pending';
   };
 
-  const canDelete = (request: any) => {
+  const canDelete = (request: RequestWithType) => {
     const requestOffers = getRequestOffers(request);
     return request.status === 'pending' && requestOffers.length === 0;
   };
 
-  const getRequestOffers = (request: any) => {
-    return offersList.filter(o => 
+  const getRequestOffers = (request: RequestWithType) => {
+    return offersList.filter((o: any) => 
       o.request_id === request.id && o.request_type === request.type
     );
   };
 
-  const handleDelete = (request: any) => {
+  const handleDelete = (request: RequestWithType) => {
     setSelectedRequest(request);
     setShowDeleteDialog(true);
   };
@@ -222,7 +258,7 @@ export const MyRequests = () => {
     }
   };
 
-  const handleAddReview = (request: any) => {
+  const handleAddReview = (request: RequestWithType) => {
     setSelectedRequest(request);
     setReviewData({ rating: 5, comment: "" });
     setShowReviewDialog(true);
@@ -397,7 +433,7 @@ export const MyRequests = () => {
       <div>
         {allRequests.length > 0 ? (
           <div className="space-y-4">
-            {allRequests.map((request: any) => {
+            {allRequests.map((request: RequestWithType) => {
               const requestOffers = getRequestOffers(request);
               
               return (
@@ -572,7 +608,7 @@ export const MyRequests = () => {
                               <Star
                                 key={i}
                                 className={`w-3 h-3 ${
-                                  i < request.review_rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                                  i < (request.review_rating || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300'
                                 }`}
                               />
                             ))}

@@ -1,5 +1,5 @@
 // ========================================
-// src/pages/auditor/profile.tsx - NOWY
+// src/pages/auditor/profile.tsx - FIXED
 // ========================================
 
 import { useForm } from "@refinedev/react-hook-form";
@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button, Input, Label } from "@/components/ui";
 import { Lead } from "@/components/reader";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { 
   Building, 
@@ -24,7 +23,7 @@ import {
   Calendar,
   Briefcase
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Identity } from "../operatorTypes";
 
 export const AuditorProfile = () => {
@@ -72,8 +71,18 @@ export const AuditorProfile = () => {
       certifications: existingProfile.certifications,
       experience_years: existingProfile.experience_years,
       description: existingProfile.description,
-    } : {},
+      specializations: existingProfile.specializations || [], // Added this line
+    } : {
+      specializations: [], // Added this line for new profiles
+    },
   });
+
+  // Initialize specializations when profile loads
+  useEffect(() => {
+    if (existingProfile?.specializations) {
+      setSelectedSpecializations(existingProfile.specializations);
+    }
+  }, [existingProfile]);
 
   const specializationOptions = [
     { value: "domy_jednorodzinne", label: "Domy jednorodzinne" },
@@ -90,7 +99,7 @@ export const AuditorProfile = () => {
       ? selectedSpecializations.filter(s => s !== spec)
       : [...selectedSpecializations, spec];
     setSelectedSpecializations(newSpecs);
-    setValue("specializations", newSpecs);
+    setValue("specializations", newSpecs); // This should now work
   };
 
   const handleFormSubmit = (data: any) => {

@@ -1,6 +1,6 @@
 // src/pages/beneficiary/audit-request-create.tsx
 import { useForm } from "@refinedev/react-hook-form";
-import { useNavigation } from "@refinedev/core";
+import { useNavigation, useCreate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,16 +15,16 @@ export const AuditRequestCreate = () => {
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
+
+  // Use useCreate for handling form submission
+  const { mutate: createAuditRequest } = useCreate();
   
   const {
-    refineCore: { onFinish },
     register,
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resource: "audit_requests",
-  });
+  } = useForm(); // ✅ Usuń 'resource' stąd
 
   const handleFormSubmit = (data: any) => {
     if (!userId) {
@@ -37,7 +37,19 @@ export const AuditRequestCreate = () => {
       beneficiary_id: userId,
       status: "pending",
     };
-    onFinish(formData);
+    
+    // ✅ Użyj createAuditRequest zamiast onFinish
+    createAuditRequest({
+      resource: "audit_requests",
+      values: formData,
+    }, {
+      onSuccess: () => {
+        list("audit_requests"); // Przekieruj po sukcesie
+      },
+      onError: (error) => {
+        console.error("Error creating audit request:", error);
+      }
+    });
   };
 
   // Show loading state if user identity is not loaded yet
