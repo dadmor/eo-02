@@ -32,6 +32,13 @@ import {
   contractorRoutes,
 } from "./pages/contractor";
 
+
+// Import zorganizowanych contractor exports
+import {
+  operatorResources,
+  operatorRoutes,
+} from "./pages/operator";
+
 function App() {
   return (
     <BrowserRouter>
@@ -44,6 +51,7 @@ function App() {
           ...beneficiaryResources,
           ...auditorResources,
           ...contractorResources,
+          ...operatorResources
         ]}
         options={{
           syncWithLocation: true,
@@ -74,15 +82,10 @@ function App() {
               element={<NavigateToResource resource="campaigns" />}
             />
 
-          
-            {/* Beneficiary routes - używamy zorganizowanych routes */}
             {...beneficiaryRoutes}
-
-            {/* Auditor routes - używamy zorganizowanych routes */}
             {...auditorRoutes}
-
-            {/* Contractor routes - używamy zorganizowanych routes */}
             {...contractorRoutes}
+            {...operatorRoutes}
 
             {/* 404 */}
             <Route path="*" element={<ErrorComponent />} />

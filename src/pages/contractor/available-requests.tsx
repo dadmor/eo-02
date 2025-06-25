@@ -31,8 +31,8 @@ import { Identity } from "../operatorTypes";
 export const ContractorAvailableRequests = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
-  const [heatSourceFilter, setHeatSourceFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [heatSourceFilter, setHeatSourceFilter] = useState("all");
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -86,8 +86,8 @@ export const ContractorAvailableRequests = () => {
       request.street_address.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.postal_code.includes(searchTerm);
     
-    const matchesCity = !cityFilter || request.city === cityFilter;
-    const matchesHeatSource = !heatSourceFilter || request.heat_source === heatSourceFilter;
+    const matchesCity = cityFilter === "all" || request.city === cityFilter;
+    const matchesHeatSource = heatSourceFilter === "all" || request.heat_source === heatSourceFilter;
     
     return matchesSearch && matchesCity && matchesHeatSource;
   });
@@ -175,7 +175,7 @@ export const ContractorAvailableRequests = () => {
                 <SelectValue placeholder="Wszystkie miasta" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Wszystkie miasta</SelectItem>
+                <SelectItem value="all">Wszystkie miasta</SelectItem>
                 {uniqueCities.map(city => (
                   <SelectItem key={city} value={city}>{city}</SelectItem>
                 ))}
@@ -186,7 +186,7 @@ export const ContractorAvailableRequests = () => {
                 <SelectValue placeholder="Źródło ciepła" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Wszystkie źródła</SelectItem>
+                <SelectItem value="all">Wszystkie źródła</SelectItem>
                 {heatSources.map(source => (
                   <SelectItem key={source.value} value={source.value}>{source.label}</SelectItem>
                 ))}
@@ -196,8 +196,8 @@ export const ContractorAvailableRequests = () => {
               variant="outline" 
               onClick={() => {
                 setSearchTerm("");
-                setCityFilter("");
-                setHeatSourceFilter("");
+                setCityFilter("all");
+                setHeatSourceFilter("all");
               }}
             >
               Wyczyść
@@ -356,10 +356,10 @@ export const ContractorAvailableRequests = () => {
             <CardContent className="text-center py-12">
               <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
               <h3 className="text-lg font-medium mb-2">
-                {searchTerm || cityFilter || heatSourceFilter ? "Brak wyników" : "Brak dostępnych zleceń"}
+                {searchTerm || (cityFilter !== "all") || (heatSourceFilter !== "all") ? "Brak wyników" : "Brak dostępnych zleceń"}
               </h3>
               <p className="text-muted-foreground">
-                {searchTerm || cityFilter || heatSourceFilter 
+                {searchTerm || (cityFilter !== "all") || (heatSourceFilter !== "all")
                   ? "Spróbuj zmienić kryteria wyszukiwania"
                   : "Sprawdź ponownie później, aby zobaczyć nowe zlecenia"
                 }

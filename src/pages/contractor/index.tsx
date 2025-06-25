@@ -76,10 +76,10 @@ export const ContractorPortfolioItemEdit = () => {
 // Resource definitions dla Refine
 export const contractorResources = [
   {
-    name: "dashboard_operator",
+    name: "dashboard_contractor",
     list: "/contractor",
     meta: {
-      label: "Dashboard (o)",
+      label: "Dashboard (c)",
       icon: "📊",
     },
   },
