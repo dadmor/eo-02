@@ -19,6 +19,36 @@ import { FlexBox, GridBox } from "@/components/shared";
 import { Lead } from "@/components/reader";
 import { useParams } from "react-router-dom";
 
+// Definicje typów
+interface ClassData {
+  id: string;
+  name: string;
+  description?: string;
+  subject?: string;
+  grade?: string;
+  school_year?: string;
+  room?: string;
+  status?: "active" | "inactive" | "archived";
+  notes?: string;
+  education_year?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  class_id?: string;
+}
+
+interface Assignment {
+  id: string;
+  title: string;
+  status: string;
+  due_date: string;
+  class_id?: string;
+}
 
 export default function ClassShow() {
   const { id } = useParams();
@@ -30,7 +60,7 @@ export default function ClassShow() {
   });
 
   // Pobierz uczniów w tej klasie
-  const { data: students } = useList({
+  const { data: studentsResult } = useList({
     resource: "students",
     filters: [
       {
@@ -42,7 +72,7 @@ export default function ClassShow() {
   });
 
   // Pobierz zadania dla tej klasy
-  const { data: assignments } = useList({
+  const { data: assignmentsResult } = useList({
     resource: "assignments",
     filters: [
       {
@@ -53,7 +83,11 @@ export default function ClassShow() {
     ],
   });
 
-  const { data: classData, isLoading } = queryResult;
+  // Poprawna destrukturyzacja danych
+  const classData = queryResult.data?.data as ClassData | undefined;
+  const isLoading = queryResult.isLoading;
+  const studentList = (studentsResult?.data as Student[]) || [];
+  const assignmentList = (assignmentsResult?.data as Assignment[]) || [];
 
   if (isLoading) {
     return (
@@ -79,9 +113,6 @@ export default function ClassShow() {
       </Card>
     );
   }
-
-  const studentList = students?.data || [];
-  const assignmentList = assignments?.data || [];
 
   return (
     <>
@@ -157,10 +188,12 @@ export default function ClassShow() {
               </div>
             )}
 
-            <div>
-              <h4 className="font-medium text-sm text-muted-foreground mb-1">Data utworzenia</h4>
-              <p>{new Date(classData.created_at).toLocaleDateString()}</p>
-            </div>
+            {classData.created_at && (
+              <div>
+                <h4 className="font-medium text-sm text-muted-foreground mb-1">Data utworzenia</h4>
+                <p>{new Date(classData.created_at).toLocaleDateString()}</p>
+              </div>
+            )}
 
             <div>
               <h4 className="font-medium text-sm text-muted-foreground mb-1">Liczba uczniów</h4>
@@ -208,7 +241,7 @@ export default function ClassShow() {
           <CardContent>
             {studentList.length > 0 ? (
               <div className="space-y-3">
-                {studentList.slice(0, 5).map((student: any) => (
+                {studentList.slice(0, 5).map((student) => (
                   <div key={student.id} className="flex items-center justify-between border rounded-lg p-3">
                     <div>
                       <p className="font-medium">{student.name}</p>
@@ -255,7 +288,7 @@ export default function ClassShow() {
           <CardContent>
             {assignmentList.length > 0 ? (
               <div className="space-y-3">
-                {assignmentList.slice(0, 5).map((assignment: any) => (
+                {assignmentList.slice(0, 5).map((assignment) => (
                   <div key={assignment.id} className="border rounded-lg p-3">
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-medium">{assignment.title}</p>

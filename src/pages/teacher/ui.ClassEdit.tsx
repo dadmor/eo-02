@@ -17,6 +17,21 @@ import { ArrowLeft, Save } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 
+// Definicja typu dla danych klasy
+interface ClassData {
+  id: string;
+  name: string;
+  description?: string;
+  subject?: string;
+  grade?: string;
+  school_year?: string;
+  room?: string;
+  status?: "active" | "inactive" | "archived";
+  notes?: string;
+  education_year?: number;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export default function ClassEdit() {
   const { id } = useParams();
@@ -27,7 +42,9 @@ export default function ClassEdit() {
     id: id!,
   });
 
-  const { data: classData, isLoading } = queryResult;
+  // Poprawna destrukturyzacja - dane są w queryResult.data.data
+  const classData = queryResult.data?.data as ClassData | undefined;
+  const isLoading = queryResult.isLoading;
 
   const {
     refineCore: { onFinish },

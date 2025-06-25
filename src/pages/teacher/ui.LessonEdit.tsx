@@ -1,4 +1,4 @@
-// src/pages/teacher/ui.LessonEdit.tsx - DOSTOSOWANE do tabeli lessons
+// src/pages/teacher/ui.LessonEdit.tsx - POPRAWIONE typy i dostęp do danych
 import { useForm } from "@refinedev/react-hook-form";
 import { useNavigation, useShow } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,16 +17,33 @@ import { ArrowLeft, Save, BookOpen } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 
+// Definicja typu dla lekcji
+type Lesson = {
+  id: string;
+  title: string;
+  description?: string;
+  subject?: string;
+  education_level?: string;
+  grade?: string;
+  topic?: string;
+  author_id: string;
+  created_at: string;
+  updated_at?: string;
+};
+
 export default function LessonEdit() {
   const { id } = useParams();
-  const { goBack, list, show } = useNavigation();
+  const { goBack,  show } = useNavigation();
   
-  const { queryResult } = useShow({
+  const { queryResult } = useShow<Lesson>({
     resource: "lessons",
     id: id!,
   });
 
-  const { data: lessonData, isLoading } = queryResult;
+  const { data: responseData, isLoading } = queryResult;
+  
+  // Uzyskaj dostęp do rzeczywistych danych lekcji
+  const lessonData = responseData?.data;
 
   const {
     refineCore: { onFinish },
@@ -130,7 +147,7 @@ export default function LessonEdit() {
                 <Label htmlFor="subject">Przedmiot</Label>
                 <Select 
                   onValueChange={(value) => setValue("subject", value)}
-                  defaultValue={lessonData.subject}
+                  defaultValue={lessonData.subject || ""}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Wybierz przedmiot" />
@@ -156,7 +173,7 @@ export default function LessonEdit() {
                 <Label htmlFor="education_level">Poziom edukacji</Label>
                 <Select 
                   onValueChange={(value) => setValue("education_level", value)}
-                  defaultValue={lessonData.education_level}
+                  defaultValue={lessonData.education_level || ""}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Wybierz poziom" />
@@ -175,7 +192,7 @@ export default function LessonEdit() {
                 <Label htmlFor="grade">Klasa</Label>
                 <Select 
                   onValueChange={(value) => setValue("grade", value)}
-                  defaultValue={lessonData.grade}
+                  defaultValue={lessonData.grade || ""}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Wybierz klasę" />
