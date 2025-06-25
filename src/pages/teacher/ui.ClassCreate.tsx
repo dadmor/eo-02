@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,7 +20,6 @@ type Identity = {
   full_name?: string;
 };
 
-
 export default function ClassCreate() {
   const { goBack, list } = useNavigation();
   const { data: identity } = useGetIdentity<Identity>();
@@ -34,17 +32,22 @@ export default function ClassCreate() {
     setValue,
   } = useForm({
     defaultValues: {
-      teacher_id: identity?.id,
-      status: "active",
+      name: "",
+      grade: "",
+      education_year: new Date().getFullYear(),
     },
   });
 
   const onSubmit = (data: any) => {
-    onFinish({
-      ...data,
-      teacher_id: identity?.id,
-      created_at: new Date().toISOString(),
-    });
+    // Mapowanie zgodne ze schematem bazy danych classes
+    const classData = {
+      name: data.name,
+      education_year: parseInt(data.education_year) || new Date().getFullYear(),
+      grade: data.grade,
+      // created_at jest automatycznie dodawane przez bazę (DEFAULT now())
+    };
+    
+    onFinish(classData);
   };
 
   return (
@@ -66,6 +69,49 @@ export default function ClassCreate() {
         </div>
       </div>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-blue-600">📚</span>
+            Do czego służy klasa?
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-2">👥 Grupowanie uczniów</h4>
+              <p className="text-sm text-green-700">
+                Klasa pozwala zebrać uczniów w jedną grupę, którą możesz zarządzać jako nauczyciel. 
+                Możesz śledzić postępy całej grupy jednocześnie.
+              </p>
+            </div>
+            
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <h4 className="font-semibold text-purple-800 mb-2">📖 Organizacja lekcji</h4>
+              <p className="text-sm text-purple-700">
+                Do klasy dodajesz lekcje, które uczniowie mają realizować. 
+                Możesz tworzyć różne zestawy lekcji dla różnych grup.
+              </p>
+            </div>
+            
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+              <h4 className="font-semibold text-orange-800 mb-2">📊 Monitoring postępów</h4>
+              <p className="text-sm text-orange-700">
+                Śledź wyniki, rankingi i postępy uczniów. System pokazuje 
+                kto ma problemy i gdzie potrzebuje dodatkowej pomocy.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700">
+              <strong>Przykład użycia:</strong> Stwórz klasę "3A Matematyka", dodaj uczniów z klasy 3A, 
+              przypisz lekcje z matematyki i obserwuj jak uczniowie zdobywają punkty XP i odznaki! 🏆
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Szczegóły klasy</CardTitle>
@@ -78,115 +124,72 @@ export default function ClassCreate() {
                 <Input
                   id="name"
                   {...register("name", { required: "Nazwa klasy jest wymagana" })}
-                  placeholder="np. Klasa 3A, Matematyka podstawowa"
+                  placeholder="np. 3A Matematyka, Klasa 5B, Liceum 2A"
                 />
                 {errors.name && (
                   <p className="text-sm text-red-500">
-                    {errors.name.message as string}
+                    {errors.name?.message}
                   </p>
                 )}
+                <p className="text-xs text-muted-foreground">
+                  Podaj pełną nazwę zawierającą przedmiot i klasę
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  onValueChange={(value) => setValue("status", value)}
-                  defaultValue="active"
+                <Label htmlFor="grade">Poziom/Klasa *</Label>
+                <Select 
+                  onValueChange={(value) => setValue("grade", value)}
+                  required
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wybierz status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Aktywna</SelectItem>
-                    <SelectItem value="inactive">Nieaktywna</SelectItem>
-                    <SelectItem value="archived">Zarchiwizowana</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="subject">Przedmiot</Label>
-                <Select onValueChange={(value) => setValue("subject", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wybierz przedmiot" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Matematyka">Matematyka</SelectItem>
-                    <SelectItem value="Polski">Język Polski</SelectItem>
-                    <SelectItem value="Angielski">Język Angielski</SelectItem>
-                    <SelectItem value="Historia">Historia</SelectItem>
-                    <SelectItem value="Geografia">Geografia</SelectItem>
-                    <SelectItem value="Biologia">Biologia</SelectItem>
-                    <SelectItem value="Chemia">Chemia</SelectItem>
-                    <SelectItem value="Fizyka">Fizyka</SelectItem>
-                    <SelectItem value="Informatyka">Informatyka</SelectItem>
-                    <SelectItem value="Plastyka">Plastyka</SelectItem>
-                    <SelectItem value="Muzyka">Muzyka</SelectItem>
-                    <SelectItem value="WF">Wychowanie Fizyczne</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="grade">Poziom/Klasa</Label>
-                <Select onValueChange={(value) => setValue("grade", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Wybierz poziom" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Klasa 1">Klasa 1</SelectItem>
-                    <SelectItem value="Klasa 2">Klasa 2</SelectItem>
-                    <SelectItem value="Klasa 3">Klasa 3</SelectItem>
-                    <SelectItem value="Klasa 4">Klasa 4</SelectItem>
-                    <SelectItem value="Klasa 5">Klasa 5</SelectItem>
-                    <SelectItem value="Klasa 6">Klasa 6</SelectItem>
-                    <SelectItem value="Klasa 7">Klasa 7</SelectItem>
-                    <SelectItem value="Klasa 8">Klasa 8</SelectItem>
-                    <SelectItem value="Liceum 1">Liceum 1</SelectItem>
-                    <SelectItem value="Liceum 2">Liceum 2</SelectItem>
-                    <SelectItem value="Liceum 3">Liceum 3</SelectItem>
+                    <SelectItem value="1">Klasa 1</SelectItem>
+                    <SelectItem value="2">Klasa 2</SelectItem>
+                    <SelectItem value="3">Klasa 3</SelectItem>
+                    <SelectItem value="4">Klasa 4</SelectItem>
+                    <SelectItem value="5">Klasa 5</SelectItem>
+                    <SelectItem value="6">Klasa 6</SelectItem>
+                    <SelectItem value="7">Klasa 7</SelectItem>
+                    <SelectItem value="8">Klasa 8</SelectItem>
+                    <SelectItem value="9">Liceum 1</SelectItem>
+                    <SelectItem value="10">Liceum 2</SelectItem>
+                    <SelectItem value="11">Liceum 3</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  Wybierz odpowiedni poziom edukacyjny
+                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="school_year">Rok szkolny</Label>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="education_year">Rok edukacyjny *</Label>
                 <Input
-                  id="school_year"
-                  {...register("school_year")}
-                  placeholder="np. 2024/2025"
+                  id="education_year"
+                  type="number"
+                  {...register("education_year", { 
+                    required: "Rok edukacyjny jest wymagany",
+                    min: { value: 2020, message: "Rok nie może być wcześniejszy niż 2020" },
+                    max: { value: 2030, message: "Rok nie może być późniejszy niż 2030" }
+                  })}
+                  placeholder="2024"
+                  min="2020"
+                  max="2030"
                 />
+                {errors.education_year && (
+                  <p className="text-sm text-red-500">
+                    {errors.education_year?.message}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Podaj rok rozpoczęcia roku szkolnego (np. 2024 dla roku 2024/2025)
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="room">Sala</Label>
-                <Input
-                  id="room"
-                  {...register("room")}
-                  placeholder="np. 101, Pracownia komputerowa"
-                />
-              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Opis klasy</Label>
-              <Textarea
-                id="description"
-                {...register("description")}
-                placeholder="Opisz klasę, cele nauczania, wymagania..."
-                rows={4}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notatki</Label>
-              <Textarea
-                id="notes"
-                {...register("notes")}
-                placeholder="Dodatkowe informacje, uwagi..."
-                rows={3}
-              />
-            </div>
+            
 
             <div className="flex justify-end space-x-2">
               <Button

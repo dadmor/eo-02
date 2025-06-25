@@ -107,6 +107,43 @@ export default function TeacherArticles() {
         </Button>
       </FlexBox>
 
+        {/* Article Statistics */}
+        {data?.data && data.data.length > 0 && (
+        <Card>
+          <CardHeader>
+            <h3 className="font-medium">Statystyki artykułów</h3>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {data.data.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Wszystkich artykułów</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {new Set(data.data.map((a: any) => a.lesson_id)).size}
+                </div>
+                <div className="text-sm text-muted-foreground">Lekcji z artykułami</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {Math.round(data.data.reduce((sum: number, a: any) => sum + (a.content?.length || 0), 0) / data.data.length)}
+                </div>
+                <div className="text-sm text-muted-foreground">Średnia długość</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">
+                  {data.data.filter((a: any) => new Date(a.created_at) > new Date(Date.now() - 7*24*60*60*1000)).length}
+                </div>
+                <div className="text-sm text-muted-foreground">Nowych (7 dni)</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <FlexBox>
         <Input
           placeholder="Szukaj artykułów..."
@@ -258,42 +295,7 @@ export default function TeacherArticles() {
         </GridBox>
       )}
 
-      {/* Article Statistics */}
-      {data?.data && data.data.length > 0 && (
-        <Card>
-          <CardHeader>
-            <h3 className="font-medium">Statystyki artykułów</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {data.data.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Wszystkich artykułów</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {new Set(data.data.map((a: any) => a.lesson_id)).size}
-                </div>
-                <div className="text-sm text-muted-foreground">Lekcji z artykułami</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {Math.round(data.data.reduce((sum: number, a: any) => sum + (a.content?.length || 0), 0) / data.data.length)}
-                </div>
-                <div className="text-sm text-muted-foreground">Średnia długość</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">
-                  {data.data.filter((a: any) => new Date(a.created_at) > new Date(Date.now() - 7*24*60*60*1000)).length}
-                </div>
-                <div className="text-sm text-muted-foreground">Nowych (7 dni)</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+    
 
       {/* Pagination */}
       <PaginationSwith

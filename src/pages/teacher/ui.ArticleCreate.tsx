@@ -51,6 +51,8 @@ export default function ArticleCreate() {
     setValue,
   } = useForm({
     defaultValues: {
+      title: "",
+      content: "",
       lesson_id: preselectedLessonId || "",
       sort_order: 0,
     },
@@ -98,6 +100,49 @@ export default function ArticleCreate() {
         </div>
       </div>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-blue-600">📄</span>
+            Do czego służy artykuł?
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-2">📚 Treści edukacyjne</h4>
+              <p className="text-sm text-blue-700">
+                Artykuły to główne źródło wiedzy w lekcji. Zawierają teorię, 
+                wyjaśnienia i przykłady potrzebne uczniom do nauki.
+              </p>
+            </div>
+            
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-2">📖 Struktura lekcji</h4>
+              <p className="text-sm text-green-700">
+                Każda lekcja może mieć wiele artykułów ułożonych w logicznej kolejności. 
+                Uczniowie czytają je przed rozwiązywaniem zadań.
+              </p>
+            </div>
+            
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <h4 className="font-semibold text-purple-800 mb-2">🎯 Przygotowanie do zadań</h4>
+              <p className="text-sm text-purple-700">
+                Artykuły dostarczają wiedzę teoretyczną, która będzie potrzebna 
+                uczniom do rozwiązywania zadań i zdobywania punktów XP.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-sm text-amber-700">
+              <strong>Przykład użycia:</strong> W lekcji "Równania kwadratowe" stwórz artykuł "Wzór na deltę", 
+              potem "Rozwiązywanie równań" i na końcu dodaj zadania praktyczne! 📝
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -117,7 +162,7 @@ export default function ArticleCreate() {
                 />
                 {errors.title && (
                   <p className="text-sm text-red-500">
-                    {errors.title.message as string}
+                    {errors.title?.message}
                   </p>
                 )}
               </div>
@@ -172,7 +217,7 @@ export default function ArticleCreate() {
               />
               {errors.content && (
                 <p className="text-sm text-red-500">
-                  {errors.content.message as string}
+                  {errors.content?.message}
                 </p>
               )}
               <p className="text-xs text-muted-foreground">

@@ -31,6 +31,14 @@ export const AuditRequestEdit = () => {
 // Resource definitions dla Refine
 export const beneficiaryResources = [
   {
+    name: "dashboard",
+    list: "/beneficiary",
+    meta: {
+      label: "Dashboard (b)",
+      icon: "📊",
+    },
+  },
+  {
     name: "service_requests",
     list: "/beneficiary/service-requests",
     create: "/beneficiary/service-request/create",

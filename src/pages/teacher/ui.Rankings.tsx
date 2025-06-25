@@ -43,13 +43,13 @@ export default function Rankings() {
 
   // Pobierz dane z view student_rankings
   const {
-    tableQuery: { data, isLoading, isError },
+    tableQuery: { data, isLoading, isError ,refetch},
     current,
     setCurrent,
     pageSize,
     setFilters,
     setSorters,
-    refetch,
+
   } = useTable({
     resource: "student_rankings",
     sorters: {

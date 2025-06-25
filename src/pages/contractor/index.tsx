@@ -76,6 +76,14 @@ export const ContractorPortfolioItemEdit = () => {
 // Resource definitions dla Refine
 export const contractorResources = [
   {
+    name: "dashboard_operator",
+    list: "/contractor",
+    meta: {
+      label: "Dashboard (o)",
+      icon: "📊",
+    },
+  },
+  {
     name: "service_requests",
     list: "/contractor/available-requests",
     show: "/contractor/request/:id",
@@ -174,38 +182,4 @@ export const contractorRoutes = [
     path="/contractor/portfolio/edit/:id"
     element={<ContractorPortfolioItemEdit />}
   />,
-];
-
-// Nawigacja główna dla wykonawców
-export const contractorNavigation = [
-  {
-    name: "Dashboard",
-    href: "/contractor",
-    icon: "🏠",
-  },
-  {
-    name: "Dostępne zlecenia",
-    href: "/contractor/available-requests",
-    icon: "🔨",
-  },
-  {
-    name: "Moje oferty",
-    href: "/contractor/my-offers",
-    icon: "💰",
-  },
-  {
-    name: "Portfolio",
-    href: "/contractor/portfolio",
-    icon: "📁",
-  },
-  {
-    name: "Profil",
-    href: "/contractor/profile",
-    icon: "👤",
-  },
-  {
-    name: "Ukończone projekty",
-    href: "/contractor/completed-projects",
-    icon: "⭐",
-  },
 ];

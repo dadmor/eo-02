@@ -141,6 +141,70 @@ export default function TeacherTasks() {
         </Button>
       </FlexBox>
 
+       {/* Task Statistics */}
+       {data?.data && data.data.length > 0 && (
+        <Card>
+          <CardHeader>
+            <h3 className="font-medium">Statystyki zadań</h3>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {data.data.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Wszystkich zadań</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {new Set(data.data.map((t: any) => t.lesson_id)).size}
+                </div>
+                <div className="text-sm text-muted-foreground">Lekcji z zadaniami</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {Math.round(data.data.reduce((sum: number, t: any) => sum + (t.xp_reward || 0), 0) / data.data.length)}
+                </div>
+                <div className="text-sm text-muted-foreground">Średnie XP</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">
+                  {new Set(data.data.map((t: any) => t.type)).size}
+                </div>
+                <div className="text-sm text-muted-foreground">Typów zadań</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Task Types Overview */}
+      {data?.data && data.data.length > 0 && (
+        <Card>
+          <CardHeader>
+            <h3 className="font-medium">Podział typów zadań</h3>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {['single_choice', 'multiple_choice', 'true_false', 'fill_blank'].map(type => {
+                const count = data.data.filter((t: any) => t.type === type).length;
+                return (
+                  <div key={type} className="text-center p-3 border rounded">
+                    <div className="flex items-center justify-center mb-2">
+                      {getTaskTypeIcon(type)}
+                    </div>
+                    <div className="text-lg font-bold">{count}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {getTaskTypeLabel(type)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <FlexBox>
         <Input
           placeholder="Szukaj zadań..."
@@ -314,69 +378,7 @@ export default function TeacherTasks() {
         </GridBox>
       )}
 
-      {/* Task Statistics */}
-      {data?.data && data.data.length > 0 && (
-        <Card>
-          <CardHeader>
-            <h3 className="font-medium">Statystyki zadań</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {data.data.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Wszystkich zadań</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {new Set(data.data.map((t: any) => t.lesson_id)).size}
-                </div>
-                <div className="text-sm text-muted-foreground">Lekcji z zadaniami</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">
-                  {Math.round(data.data.reduce((sum: number, t: any) => sum + (t.xp_reward || 0), 0) / data.data.length)}
-                </div>
-                <div className="text-sm text-muted-foreground">Średnie XP</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">
-                  {new Set(data.data.map((t: any) => t.type)).size}
-                </div>
-                <div className="text-sm text-muted-foreground">Typów zadań</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Task Types Overview */}
-      {data?.data && data.data.length > 0 && (
-        <Card>
-          <CardHeader>
-            <h3 className="font-medium">Podział typów zadań</h3>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['single_choice', 'multiple_choice', 'true_false', 'fill_blank'].map(type => {
-                const count = data.data.filter((t: any) => t.type === type).length;
-                return (
-                  <div key={type} className="text-center p-3 border rounded">
-                    <div className="flex items-center justify-center mb-2">
-                      {getTaskTypeIcon(type)}
-                    </div>
-                    <div className="text-lg font-bold">{count}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {getTaskTypeLabel(type)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+     
 
       {/* Pagination */}
       <PaginationSwith

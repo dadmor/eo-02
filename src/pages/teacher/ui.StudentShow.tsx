@@ -16,8 +16,6 @@ import {
   Award,
   TrendingUp,
   FileText,
-  CheckCircle,
-  Clock,
   Star,
   Target,
   Flame,
@@ -30,10 +28,30 @@ import { useParams } from "react-router-dom";
 
 export const routeConfig = { path: "/teacher/students/:id", title: "Student Details" };
 
+interface Student extends BaseRecord {
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  status?: string;
+  class_name?: string;
+  grade?: string;
+  level?: number;
+  xp?: number;
+  streak?: number;
+  notes?: string;
+  learning_preferences?: string;
+  birth_date?: string;
+  address?: string;
+  parent_email?: string;
+  created_at?: string;
+  class_id?: string;
+  phone?: string;
+}
+
 export default function StudentShow() {
   const { id } = useParams();
   const { goBack, edit } = useNavigation();
-  
+
   const { queryResult } = useShow({
     resource: "students",
     id: id!,
@@ -76,6 +94,8 @@ export default function StudentShow() {
   });
 
   const { data: studentData, isLoading } = queryResult;
+
+  const student = studentData as Student;
 
   if (isLoading) {
     return (

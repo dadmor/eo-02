@@ -1,4 +1,4 @@
-// src/pages/teacher/ui.LessonCreate.tsx - Z DEBUGOWANIEM
+// src/pages/teacher/ui.LessonCreate.tsx
 import { useForm } from "@refinedev/react-hook-form";
 import { useNavigation, useGetIdentity } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +44,12 @@ export default function LessonCreate() {
     setValue,
   } = useForm({
     defaultValues: {
+      title: "",
+      description: "",
+      subject: "",
+      education_level: "",
+      grade: "",
+      topic: "",
       author_id: identity?.id,
     },
   });
@@ -128,6 +134,49 @@ export default function LessonCreate() {
         </div>
       </div>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-blue-600">📚</span>
+            Do czego służy lekcja?
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+              <h4 className="font-semibold text-indigo-800 mb-2">🎯 Kontener wiedzy</h4>
+              <p className="text-sm text-indigo-700">
+                Lekcja grupuje artykuły (teoria) i zadania (praktyka) w logiczną całość 
+                poświęconą jednemu tematowi.
+              </p>
+            </div>
+            
+            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+              <h4 className="font-semibold text-emerald-800 mb-2">🏗️ Struktura kursu</h4>
+              <p className="text-sm text-emerald-700">
+                Lekcje można przypisywać do klas. Uczniowie przechodzą przez 
+                lekcje w określonej kolejności, zdobywając wiedzę krok po kroku.
+              </p>
+            </div>
+            
+            <div className="bg-rose-50 p-4 rounded-lg border border-rose-200">
+              <h4 className="font-semibold text-rose-800 mb-2">📊 Śledzenie postępów</h4>
+              <p className="text-sm text-rose-700">
+                System śledzi jak uczniowie radzą sobie z każdą lekcją - 
+                wyniki zadań, zdobyte punkty XP i odznaki.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
+            <p className="text-sm text-cyan-700">
+              <strong>Przykład użycia:</strong> Stwórz lekcję "Równania kwadratowe", dodaj 3 artykuły 
+              z teorią, 5 zadań do rozwiązania i przypisz do klasy "2A Matematyka"! 🧮
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -147,7 +196,7 @@ export default function LessonCreate() {
                 />
                 {errors.title && (
                   <p className="text-sm text-red-500">
-                    {errors.title.message as string}
+                    {errors.title?.message}
                   </p>
                 )}
               </div>
@@ -247,6 +296,21 @@ export default function LessonCreate() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Tips Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>💡 Wskazówki</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 text-sm">
+            <p><strong>Planowanie:</strong> Zanim stworzysz lekcję, przemyśl jakie artykuły i zadania będą potrzebne</p>
+            <p><strong>Nazewnictwo:</strong> Używaj jasnych i opisowych tytułów, np. "Równania kwadratowe - wprowadzenie"</p>
+            <p><strong>Kolejność:</strong> Po utworzeniu lekcji dodaj najpierw artykuły z teorią, potem zadania praktyczne</p>
+            <p><strong>Przypisywanie:</strong> Pamiętaj o przypisaniu lekcji do odpowiedniej klasy po jej utworzeniu</p>
+          </div>
         </CardContent>
       </Card>
     </>

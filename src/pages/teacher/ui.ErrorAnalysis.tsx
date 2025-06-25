@@ -38,12 +38,11 @@ export default function ErrorAnalysis() {
 
   // Pobierz dane z view error_analysis
   const {
-    tableQuery: { data, isLoading, isError },
+    tableQuery: { data, isLoading, isError, refetch },
     current,
     setCurrent,
     pageSize,
     setFilters,
-    refetch,
   } = useTable({
     resource: "error_analysis",
     sorters: {

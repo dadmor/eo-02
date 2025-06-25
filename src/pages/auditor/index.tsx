@@ -44,6 +44,14 @@ export const PortfolioItemEdit = () => {
 // Resource definitions dla Refine
 export const auditorResources = [
   {
+    name: "dashboard_auditor",
+    list: "/auditor",
+    meta: {
+      label: "Dashboard (a)",
+      icon: "📊",
+    },
+  },
+  {
     name: "audit_requests",
     list: "/auditor/available-requests",
     show: "/auditor/request/:id",
