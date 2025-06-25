@@ -18,7 +18,6 @@ export const LoginPage: React.FC = () => {
     setPassword,
     isLoading,
     error,
-    rawError,
     handleSubmit
   } = useLoginForm();
 
@@ -162,33 +161,7 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Debug info - tylko development */}
-          {process.env.NODE_ENV === 'development' && (
-            <details className="mt-4">
-              <summary className="cursor-pointer text-xs text-gray-500">
-                Debug: Stan hooka
-              </summary>
-              <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto space-y-2">
-                <div>
-                  <strong>Hook state:</strong>
-                  <pre>{JSON.stringify({ 
-                    isLoading, 
-                    hasError: !!error, 
-                    hasRawError: !!rawError,
-                    errorMessage: error,
-                    email: email ? "***" : "", 
-                    password: password ? "***" : "" 
-                  }, null, 2)}</pre>
-                </div>
-                {rawError && (
-                  <div>
-                    <strong>Raw error object:</strong>
-                    <pre>{JSON.stringify(rawError, null, 2)}</pre>
-                  </div>
-                )}
-              </div>
-            </details>
-          )}
+          
         </CardContent>
       </Card>
     </NarrowCol>
