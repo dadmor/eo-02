@@ -1,5 +1,5 @@
-import path from "path";
 import react from "@vitejs/plugin-react";
+import path from "path";
 import { defineConfig } from "vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
@@ -13,11 +13,15 @@ export default defineConfig({
       brotliSize: true,
     }),
   ],
+  server: {
+    port: 3000,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: "/",
   build: {
     rollupOptions: {
       output: {
