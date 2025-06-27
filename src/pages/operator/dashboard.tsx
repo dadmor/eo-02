@@ -5,18 +5,24 @@
 import { useState, useMemo } from "react";
 import { useList, useUpdate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FlexBox, GridBox } from "@/components/shared";
 import { Lead } from "@/components/reader";
 import { Badge, Button } from "@/components/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle, 
+import {
+  FileText,
+  Clock,
+  CheckCircle,
   Eye,
   Star,
   Euro,
@@ -32,7 +38,8 @@ import {
   Square,
   Check,
   X,
-  AlertCircle
+  AlertCircle,
+  ScanEye,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Identity } from "../operatorTypes";
@@ -40,31 +47,38 @@ import { Identity } from "../operatorTypes";
 export const OperatorDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   // Stany dla dialogów weryfikacji
   const [verificationDialog, setVerificationDialog] = useState<{
     open: boolean;
-    type: 'service' | 'audit' | null;
+    type: "service" | "audit" | null;
     item: any;
-    action: 'verify' | 'reject' | null;
+    action: "verify" | "reject" | null;
   }>({
     open: false,
     type: null,
     item: null,
-    action: null
+    action: null,
   });
   const [verificationReason, setVerificationReason] = useState("");
-  
+
   // Get authenticated user
-  const { data: identity, isLoading: identityLoading } = useGetIdentity<Identity>();
+  const { data: identity, isLoading: identityLoading } =
+    useGetIdentity<Identity>();
   const userId = identity?.id;
-  
+
   // Hooks do aktualizacji
-  const { mutate: updateServiceRequest, isLoading: updatingServiceRequest } = useUpdate();
-  const { mutate: updateAuditRequest, isLoading: updatingAuditRequest } = useUpdate();
-  
+  const { mutate: updateServiceRequest, isLoading: updatingServiceRequest } =
+    useUpdate();
+  const { mutate: updateAuditRequest, isLoading: updatingAuditRequest } =
+    useUpdate();
+
   // WSZYSTKIE service_requests - bez filtra statusu!
-  const { data: serviceRequests, isLoading: loadingServiceRequests, refetch: refetchServiceRequests } = useList({
+  const {
+    data: serviceRequests,
+    isLoading: loadingServiceRequests,
+    refetch: refetchServiceRequests,
+  } = useList({
     resource: "service_requests",
     sorters: [
       {
@@ -79,7 +93,11 @@ export const OperatorDashboard = () => {
   });
 
   // WSZYSTKIE audit_requests
-  const { data: auditRequests, isLoading: loadingAuditRequests, refetch: refetchAuditRequests } = useList({
+  const {
+    data: auditRequests,
+    isLoading: loadingAuditRequests,
+    refetch: refetchAuditRequests,
+  } = useList({
     resource: "audit_requests",
     sorters: [
       {
@@ -151,12 +169,16 @@ export const OperatorDashboard = () => {
   });
 
   // Funkcje weryfikacji
-  const handleVerificationDialog = (type: 'service' | 'audit', item: any, action: 'verify' | 'reject') => {
+  const handleVerificationDialog = (
+    type: "service" | "audit",
+    item: any,
+    action: "verify" | "reject"
+  ) => {
     setVerificationDialog({
       open: true,
       type,
       item,
-      action
+      action,
     });
     setVerificationReason("");
   };
@@ -166,98 +188,112 @@ export const OperatorDashboard = () => {
       open: false,
       type: null,
       item: null,
-      action: null
+      action: null,
     });
     setVerificationReason("");
   };
 
   const handleConfirmVerification = () => {
     const { type, item, action } = verificationDialog;
-    
+
     if (!type || !item || !action) return;
 
-    const newStatus = action === 'verify' ? 'verified' : 'rejected';
+    const newStatus = action === "verify" ? "verified" : "rejected";
     const updateData = {
       status: newStatus,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     // Dodaj log moderacji
     const moderationLogData = {
       operator_id: userId,
-      target_table: type === 'service' ? 'service_requests' : 'audit_requests',
+      target_table: type === "service" ? "service_requests" : "audit_requests",
       target_id: item.id,
-      action: action === 'verify' ? 'verified' : 'rejected',
-      reason: verificationReason || null
+      action: action === "verify" ? "verified" : "rejected",
+      reason: verificationReason || null,
     };
 
-    if (type === 'service') {
+    if (type === "service") {
       updateServiceRequest(
         {
           resource: "service_requests",
           id: item.id,
-          values: updateData
+          values: updateData,
         },
         {
           onSuccess: () => {
             // Zapisz log moderacji
-            fetch('/api/moderation_logs', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(moderationLogData)
+            fetch("/api/moderation_logs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(moderationLogData),
             });
 
-            toast.success(action === 'verify' ? "Zlecenie zweryfikowane" : "Zlecenie odrzucone", {
-              description: action === 'verify' 
-                ? "Zlecenie zostało pomyślnie zweryfikowane i opublikowane."
-                : "Zlecenie zostało odrzucone."
-            });
+            toast.success(
+              action === "verify"
+                ? "Zlecenie zweryfikowane"
+                : "Zlecenie odrzucone",
+              {
+                description:
+                  action === "verify"
+                    ? "Zlecenie zostało pomyślnie zweryfikowane i opublikowane."
+                    : "Zlecenie zostało odrzucone.",
+              }
+            );
             refetchServiceRequests();
             handleCloseVerificationDialog();
           },
           onError: (error) => {
             toast.error("Błąd", {
-              description: "Nie udało się zaktualizować statusu zlecenia."
+              description: "Nie udało się zaktualizować statusu zlecenia.",
             });
-          }
+          },
         }
       );
-    } else if (type === 'audit') {
+    } else if (type === "audit") {
       updateAuditRequest(
         {
           resource: "audit_requests",
           id: item.id,
-          values: updateData
+          values: updateData,
         },
         {
           onSuccess: () => {
             // Zapisz log moderacji
-            fetch('/api/moderation_logs', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(moderationLogData)
+            fetch("/api/moderation_logs", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(moderationLogData),
             });
 
-            toast.success(action === 'verify' ? "Zlecenie audytu zweryfikowane" : "Zlecenie audytu odrzucone", {
-              description: action === 'verify' 
-                ? "Zlecenie audytu zostało pomyślnie zweryfikowane i opublikowane."
-                : "Zlecenie audytu zostało odrzucone."
-            });
+            toast.success(
+              action === "verify"
+                ? "Zlecenie audytu zweryfikowane"
+                : "Zlecenie audytu odrzucone",
+              {
+                description:
+                  action === "verify"
+                    ? "Zlecenie audytu zostało pomyślnie zweryfikowane i opublikowane."
+                    : "Zlecenie audytu zostało odrzucone.",
+              }
+            );
             refetchAuditRequests();
             handleCloseVerificationDialog();
           },
           onError: (error) => {
             toast.error("Błąd", {
-              description: "Nie udało się zaktualizować statusu zlecenia audytu."
+              description:
+                "Nie udało się zaktualizować statusu zlecenia audytu.",
             });
-          }
+          },
         }
       );
     }
   };
 
   // Sprawdź stan loading - uwzględnij loading identity
-  const isLoading = identityLoading || loadingServiceRequests || loadingAuditRequests;
+  const isLoading =
+    identityLoading || loadingServiceRequests || loadingAuditRequests;
 
   // Jeśli identity nie zostało jeszcze załadowane, pokaż loading
   if (identityLoading) {
@@ -315,28 +351,46 @@ export const OperatorDashboard = () => {
   // Statystyki dla operatora
   const stats = {
     // Zlecenia serwisowe
-    pendingServiceRequests: allServiceRequests.filter(r => r.status === 'pending').length,
-    verifiedServiceRequests: allServiceRequests.filter(r => r.status === 'verified').length,
-    rejectedServiceRequests: allServiceRequests.filter(r => r.status === 'rejected').length,
+    pendingServiceRequests: allServiceRequests.filter(
+      (r) => r.status === "pending"
+    ).length,
+    verifiedServiceRequests: allServiceRequests.filter(
+      (r) => r.status === "verified"
+    ).length,
+    rejectedServiceRequests: allServiceRequests.filter(
+      (r) => r.status === "rejected"
+    ).length,
     totalServiceRequests: allServiceRequests.length,
-    
+
     // Zlecenia audytorskie
-    pendingAuditRequests: allAuditRequests.filter(r => r.status === 'pending').length,
-    verifiedAuditRequests: allAuditRequests.filter(r => r.status === 'verified').length,
-    rejectedAuditRequests: allAuditRequests.filter(r => r.status === 'rejected').length,
+    pendingAuditRequests: allAuditRequests.filter((r) => r.status === "pending")
+      .length,
+    verifiedAuditRequests: allAuditRequests.filter(
+      (r) => r.status === "verified"
+    ).length,
+    rejectedAuditRequests: allAuditRequests.filter(
+      (r) => r.status === "rejected"
+    ).length,
     totalAuditRequests: allAuditRequests.length,
-    
+
     // Oferty
-    pendingContractorOffers: allContractorOffers.filter(o => o.status === 'pending').length,
-    pendingAuditorOffers: allAuditorOffers.filter(o => o.status === 'pending').length,
-    
+    pendingContractorOffers: allContractorOffers.filter(
+      (o) => o.status === "pending"
+    ).length,
+    pendingAuditorOffers: allAuditorOffers.filter((o) => o.status === "pending")
+      .length,
+
     // Kontakty
     newContacts: allContactRequests.length,
   };
 
   // Elementy wymagające moderacji
-  const pendingServiceRequests = allServiceRequests.filter(r => r.status === 'pending').slice(0, 5);
-  const pendingAuditRequests = allAuditRequests.filter(r => r.status === 'pending').slice(0, 5);
+  const pendingServiceRequests = allServiceRequests
+    .filter((r) => r.status === "pending")
+    .slice(0, 5);
+  const pendingAuditRequests = allAuditRequests
+    .filter((r) => r.status === "pending")
+    .slice(0, 5);
   const recentServiceRequests = allServiceRequests.slice(0, 5);
   const recentAuditRequests = allAuditRequests.slice(0, 5);
 
@@ -358,11 +412,13 @@ export const OperatorDashboard = () => {
                   Wymagają moderacji
                 </h3>
                 <p className="text-orange-800 mb-3">
-                  {stats.pendingServiceRequests} zleceń wykonawców i {stats.pendingAuditRequests} zleceń audytorów czeka na weryfikację.
+                  {stats.pendingServiceRequests} zleceń wykonawców i{" "}
+                  {stats.pendingAuditRequests} zleceń audytorów czeka na
+                  weryfikację.
                 </p>
                 <div className="flex gap-2">
                   {stats.pendingServiceRequests > 0 && (
-                    <Button 
+                    <Button
                       onClick={() => setActiveTab("service-moderation")}
                       className="bg-orange-600 hover:bg-orange-700"
                       size="sm"
@@ -372,7 +428,7 @@ export const OperatorDashboard = () => {
                     </Button>
                   )}
                   {stats.pendingAuditRequests > 0 && (
-                    <Button 
+                    <Button
                       onClick={() => setActiveTab("audit-moderation")}
                       className="bg-orange-600 hover:bg-orange-700"
                       size="sm"
@@ -395,18 +451,37 @@ export const OperatorDashboard = () => {
             <div className="flex items-center gap-3">
               <FileText className="w-8 h-8 text-blue-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.totalServiceRequests}</div>
-                <div className="text-sm text-muted-foreground">Wszystkie zlecenia wykonawców</div>
-                <div className="flex gap-2 text-xs mt-1">
-                  <span className="text-orange-600">{stats.pendingServiceRequests} do weryfikacji</span>
-                  <span className="text-green-600">{stats.verifiedServiceRequests} zweryfikowanych</span>
-                  {stats.rejectedServiceRequests > 0 && (
-                    <span className="text-red-600">{stats.rejectedServiceRequests} odrzuconych</span>
-                  )}
+                
+                  <div className="text-2xl font-bold">
+                    {stats.totalServiceRequests}
+                  </div>
+                  
+                
+
+                <div className="text-sm text-muted-foreground">
+                  Wszystkie zlecenia wykonawców
                 </div>
+
+            
               </div>
             </div>
           </CardContent>
+          <CardFooter>    <div className="flex justify-end gap-4 text-xs mt-1 w-full">
+                    <div className="text-orange-600 flex gap-1 border border-orange-200 p-1 px-2 rounded">
+                      {stats.pendingServiceRequests}{" "}
+                      <ScanEye className="w-4 h-4" />
+                    </div>
+                    <div className="text-green-600 flex gap-1 border border-green-200 p-1 px-2 rounded">
+                      {stats.verifiedServiceRequests}{" "}
+                      <Check className="w-4 h-4" />
+                    </div>
+                    {stats.rejectedServiceRequests > 0 && (
+                      <div className="text-red-600 flex gap-1 border border-red-200 p-1 px-2 rounded">
+                        {stats.rejectedServiceRequests}{" "}
+                        <X className="w-4 h-4" />
+                      </div>
+                    )}
+                  </div></CardFooter>
         </Card>
 
         <Card>
@@ -414,13 +489,23 @@ export const OperatorDashboard = () => {
             <div className="flex items-center gap-3">
               <Star className="w-8 h-8 text-purple-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.totalAuditRequests}</div>
-                <div className="text-sm text-muted-foreground">Wszystkie zlecenia audytorów</div>
+                <div className="text-2xl font-bold">
+                  {stats.totalAuditRequests}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Wszystkie zlecenia audytorów
+                </div>
                 <div className="flex gap-2 text-xs mt-1">
-                  <span className="text-orange-600">{stats.pendingAuditRequests} do weryfikacji</span>
-                  <span className="text-green-600">{stats.verifiedAuditRequests} zweryfikowanych</span>
+                  <span className="text-orange-600">
+                    {stats.pendingAuditRequests} do weryfikacji
+                  </span>
+                  <span className="text-green-600">
+                    {stats.verifiedAuditRequests} zweryfikowanych
+                  </span>
                   {stats.rejectedAuditRequests > 0 && (
-                    <span className="text-red-600">{stats.rejectedAuditRequests} odrzuconych</span>
+                    <span className="text-red-600">
+                      {stats.rejectedAuditRequests} odrzuconych
+                    </span>
                   )}
                 </div>
               </div>
@@ -433,8 +518,12 @@ export const OperatorDashboard = () => {
             <div className="flex items-center gap-3">
               <Euro className="w-8 h-8 text-green-600" />
               <div>
-                <div className="text-2xl font-bold">{stats.pendingContractorOffers}</div>
-                <div className="text-sm text-muted-foreground">Nowe oferty wykonawców</div>
+                <div className="text-2xl font-bold">
+                  {stats.pendingContractorOffers}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Nowe oferty wykonawców
+                </div>
               </div>
             </div>
           </CardContent>
@@ -446,7 +535,9 @@ export const OperatorDashboard = () => {
               <User className="w-8 h-8 text-indigo-600" />
               <div>
                 <div className="text-2xl font-bold">{stats.newContacts}</div>
-                <div className="text-sm text-muted-foreground">Nowe kontakty (7 dni)</div>
+                <div className="text-sm text-muted-foreground">
+                  Nowe kontakty (7 dni)
+                </div>
               </div>
             </div>
           </CardContent>
@@ -458,10 +549,14 @@ export const OperatorDashboard = () => {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Przegląd</TabsTrigger>
           <TabsTrigger value="service-moderation">
-            Moderacja Wykonawców {stats.pendingServiceRequests > 0 && `(${stats.pendingServiceRequests})`}
+            Moderacja Wykonawców{" "}
+            {stats.pendingServiceRequests > 0 &&
+              `(${stats.pendingServiceRequests})`}
           </TabsTrigger>
           <TabsTrigger value="audit-moderation">
-            Moderacja Audytorów {stats.pendingAuditRequests > 0 && `(${stats.pendingAuditRequests})`}
+            Moderacja Audytorów{" "}
+            {stats.pendingAuditRequests > 0 &&
+              `(${stats.pendingAuditRequests})`}
           </TabsTrigger>
           <TabsTrigger value="reports">Raporty</TabsTrigger>
         </TabsList>
@@ -476,31 +571,31 @@ export const OperatorDashboard = () => {
                   <CardTitle>Szybkie akcje</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={() => setActiveTab("service-moderation")}
                   >
                     <Shield className="w-4 h-4 mr-2" />
                     Moderuj zlecenia ({stats.pendingServiceRequests})
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => setActiveTab("audit-moderation")}
                   >
                     <Shield className="w-4 h-4 mr-2" />
                     Moderuj audyty ({stats.pendingAuditRequests})
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
-                    onClick={() => navigate('/operator/users')}
+                    onClick={() => navigate("/operator/users")}
                   >
                     <User className="w-4 h-4 mr-2" />
                     Zarządzaj użytkownikami
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => setActiveTab("reports")}
                   >
@@ -517,8 +612,8 @@ export const OperatorDashboard = () => {
                 <CardHeader>
                   <FlexBox>
                     <CardTitle>Ostatnie zlecenia wykonawców</CardTitle>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setActiveTab("service-moderation")}
                     >
@@ -533,31 +628,45 @@ export const OperatorDashboard = () => {
                         <div key={request.id} className="border rounded-lg p-3">
                           <FlexBox>
                             <div>
-                              <div className="font-medium">{request.city}, {request.postal_code}</div>
+                              <div className="font-medium">
+                                {request.city}, {request.postal_code}
+                              </div>
                               <div className="text-sm text-muted-foreground flex items-center gap-4">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="w-3 h-3" />
-                                  {new Date(request.created_at).toLocaleDateString()}
+                                  {new Date(
+                                    request.created_at
+                                  ).toLocaleDateString()}
                                 </span>
-                                <Badge 
-                                  variant="outline" 
+                                <Badge
+                                  variant="outline"
                                   className={
-                                    request.status === 'pending' ? 'border-orange-500 text-orange-700' :
-                                    request.status === 'verified' ? 'border-green-500 text-green-700' :
-                                    request.status === 'rejected' ? 'border-red-500 text-red-700' :
-                                    'border-gray-500 text-gray-700'
+                                    request.status === "pending"
+                                      ? "border-orange-500 text-orange-700"
+                                      : request.status === "verified"
+                                      ? "border-green-500 text-green-700"
+                                      : request.status === "rejected"
+                                      ? "border-red-500 text-red-700"
+                                      : "border-gray-500 text-gray-700"
                                   }
                                 >
-                                  {request.status === 'pending' ? 'Do weryfikacji' :
-                                   request.status === 'verified' ? 'Zweryfikowane' : 
-                                   request.status === 'rejected' ? 'Odrzucone' :
-                                   request.status}
+                                  {request.status === "pending"
+                                    ? "Do weryfikacji"
+                                    : request.status === "verified"
+                                    ? "Zweryfikowane"
+                                    : request.status === "rejected"
+                                    ? "Odrzucone"
+                                    : request.status}
                                 </Badge>
                               </div>
                             </div>
-                            <Button 
+                            <Button
                               size="sm"
-                              onClick={() => navigate(`/operator/service-request/${request.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/operator/service-request/${request.id}`
+                                )
+                              }
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -594,7 +703,9 @@ export const OperatorDashboard = () => {
                       <CardContent className="p-4">
                         <FlexBox className="mb-3">
                           <div>
-                            <h4 className="font-medium">{request.city}, {request.street_address}</h4>
+                            <h4 className="font-medium">
+                              {request.city}, {request.street_address}
+                            </h4>
                             <div className="text-sm text-muted-foreground flex items-center gap-4">
                               <span className="flex items-center gap-1">
                                 <MapPin className="w-3 h-3" />
@@ -602,7 +713,9 @@ export const OperatorDashboard = () => {
                               </span>
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {new Date(request.created_at).toLocaleDateString()}
+                                {new Date(
+                                  request.created_at
+                                ).toLocaleDateString()}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Phone className="w-3 h-3" />
@@ -611,10 +724,14 @@ export const OperatorDashboard = () => {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button 
+                            <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/operator/service-request/${request.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/operator/service-request/${request.id}`
+                                )
+                              }
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               Szczegóły
@@ -622,7 +739,13 @@ export const OperatorDashboard = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleVerificationDialog('service', request, 'reject')}
+                              onClick={() =>
+                                handleVerificationDialog(
+                                  "service",
+                                  request,
+                                  "reject"
+                                )
+                              }
                               className="border-red-500 text-red-700 hover:bg-red-50"
                             >
                               <X className="w-4 h-4 mr-1" />
@@ -630,7 +753,13 @@ export const OperatorDashboard = () => {
                             </Button>
                             <Button
                               size="sm"
-                              onClick={() => handleVerificationDialog('service', request, 'verify')}
+                              onClick={() =>
+                                handleVerificationDialog(
+                                  "service",
+                                  request,
+                                  "verify"
+                                )
+                              }
                               className="bg-green-600 hover:bg-green-700"
                             >
                               <Check className="w-4 h-4 mr-1" />
@@ -638,7 +767,7 @@ export const OperatorDashboard = () => {
                             </Button>
                           </div>
                         </FlexBox>
-                        
+
                         {/* Szczegóły techniczne */}
                         <div className="flex flex-wrap gap-2 text-sm">
                           {request.heat_source && (
@@ -703,7 +832,9 @@ export const OperatorDashboard = () => {
                       <CardContent className="p-4">
                         <FlexBox>
                           <div>
-                            <h4 className="font-medium">{request.city}, {request.street_address}</h4>
+                            <h4 className="font-medium">
+                              {request.city}, {request.street_address}
+                            </h4>
                             <div className="text-sm text-muted-foreground flex items-center gap-4">
                               <span className="flex items-center gap-1">
                                 <MapPin className="w-3 h-3" />
@@ -711,7 +842,9 @@ export const OperatorDashboard = () => {
                               </span>
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {new Date(request.created_at).toLocaleDateString()}
+                                {new Date(
+                                  request.created_at
+                                ).toLocaleDateString()}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Phone className="w-3 h-3" />
@@ -720,10 +853,14 @@ export const OperatorDashboard = () => {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button 
+                            <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => navigate(`/operator/audit-request/${request.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/operator/audit-request/${request.id}`
+                                )
+                              }
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               Szczegóły
@@ -731,7 +868,13 @@ export const OperatorDashboard = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleVerificationDialog('audit', request, 'reject')}
+                              onClick={() =>
+                                handleVerificationDialog(
+                                  "audit",
+                                  request,
+                                  "reject"
+                                )
+                              }
                               className="border-red-500 text-red-700 hover:bg-red-50"
                             >
                               <X className="w-4 h-4 mr-1" />
@@ -739,7 +882,13 @@ export const OperatorDashboard = () => {
                             </Button>
                             <Button
                               size="sm"
-                              onClick={() => handleVerificationDialog('audit', request, 'verify')}
+                              onClick={() =>
+                                handleVerificationDialog(
+                                  "audit",
+                                  request,
+                                  "verify"
+                                )
+                              }
                               className="bg-green-600 hover:bg-green-700"
                             >
                               <Check className="w-4 h-4 mr-1" />
@@ -774,7 +923,9 @@ export const OperatorDashboard = () => {
               <div className="text-center py-8 text-muted-foreground">
                 <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Moduł raportów - do implementacji</p>
-                <p className="text-sm">Statystyki aktywności, zleceń, użytkowników</p>
+                <p className="text-sm">
+                  Statystyki aktywności, zleceń, użytkowników
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -782,11 +933,14 @@ export const OperatorDashboard = () => {
       </Tabs>
 
       {/* Dialog weryfikacji */}
-      <Dialog open={verificationDialog.open} onOpenChange={handleCloseVerificationDialog}>
+      <Dialog
+        open={verificationDialog.open}
+        onOpenChange={handleCloseVerificationDialog}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {verificationDialog.action === 'verify' ? (
+              {verificationDialog.action === "verify" ? (
                 <>
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   Potwierdź weryfikację
@@ -799,33 +953,43 @@ export const OperatorDashboard = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="p-4 bg-gray-50 rounded-lg">
               <h4 className="font-medium mb-2">
-                {verificationDialog.type === 'service' ? 'Zlecenie wykonawcy' : 'Zlecenie audytu'}
+                {verificationDialog.type === "service"
+                  ? "Zlecenie wykonawcy"
+                  : "Zlecenie audytu"}
               </h4>
               {verificationDialog.item && (
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <p>{verificationDialog.item.city}, {verificationDialog.item.street_address}</p>
+                  <p>
+                    {verificationDialog.item.city},{" "}
+                    {verificationDialog.item.street_address}
+                  </p>
                   <p>Kod: {verificationDialog.item.postal_code}</p>
                   <p>Tel: {verificationDialog.item.phone_number}</p>
-                  <p>Data: {new Date(verificationDialog.item.created_at).toLocaleDateString()}</p>
+                  <p>
+                    Data:{" "}
+                    {new Date(
+                      verificationDialog.item.created_at
+                    ).toLocaleDateString()}
+                  </p>
                 </div>
               )}
             </div>
 
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {verificationDialog.action === 'verify' 
-                  ? 'Uwagi do weryfikacji (opcjonalne)' 
-                  : 'Powód odrzucenia (opcjonalne)'}
+                {verificationDialog.action === "verify"
+                  ? "Uwagi do weryfikacji (opcjonalne)"
+                  : "Powód odrzucenia (opcjonalne)"}
               </label>
               <Textarea
                 value={verificationReason}
                 onChange={(e) => setVerificationReason(e.target.value)}
                 placeholder={
-                  verificationDialog.action === 'verify'
+                  verificationDialog.action === "verify"
                     ? "Dodatkowe uwagi dotyczące weryfikacji..."
                     : "Podaj powód odrzucenia zlecenia..."
                 }
@@ -833,25 +997,30 @@ export const OperatorDashboard = () => {
               />
             </div>
 
-            <div className={`p-3 rounded-lg ${
-              verificationDialog.action === 'verify' 
-                ? 'bg-green-50 border border-green-200' 
-                : 'bg-red-50 border border-red-200'
-            }`}>
+            <div
+              className={`p-3 rounded-lg ${
+                verificationDialog.action === "verify"
+                  ? "bg-green-50 border border-green-200"
+                  : "bg-red-50 border border-red-200"
+              }`}
+            >
               <div className="flex items-start gap-2">
-                {verificationDialog.action === 'verify' ? (
+                {verificationDialog.action === "verify" ? (
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
                 ) : (
                   <AlertCircle className="w-4 h-4 text-red-600 mt-0.5" />
                 )}
                 <div className="text-sm">
-                  {verificationDialog.action === 'verify' ? (
+                  {verificationDialog.action === "verify" ? (
                     <>
                       <p className="font-medium text-green-900">
                         Zlecenie zostanie zweryfikowane
                       </p>
                       <p className="text-green-700">
-                        Po weryfikacji zlecenie będzie widoczne dla {verificationDialog.type === 'service' ? 'wykonawców' : 'audytorów'} 
+                        Po weryfikacji zlecenie będzie widoczne dla{" "}
+                        {verificationDialog.type === "service"
+                          ? "wykonawców"
+                          : "audytorów"}
                         i będą mogli składać oferty.
                       </p>
                     </>
@@ -861,8 +1030,11 @@ export const OperatorDashboard = () => {
                         Zlecenie zostanie odrzucone
                       </p>
                       <p className="text-red-700">
-                        Odrzucone zlecenie nie będzie widoczne dla {verificationDialog.type === 'service' ? 'wykonawców' : 'audytorów'}.
-                        Beneficjent zostanie poinformowany o odrzuceniu.
+                        Odrzucone zlecenie nie będzie widoczne dla{" "}
+                        {verificationDialog.type === "service"
+                          ? "wykonawców"
+                          : "audytorów"}
+                        . Beneficjent zostanie poinformowany o odrzuceniu.
                       </p>
                     </>
                   )}
@@ -883,15 +1055,15 @@ export const OperatorDashboard = () => {
               onClick={handleConfirmVerification}
               disabled={updatingServiceRequest || updatingAuditRequest}
               className={
-                verificationDialog.action === 'verify'
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-red-600 hover:bg-red-700'
+                verificationDialog.action === "verify"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
               }
             >
               {(updatingServiceRequest || updatingAuditRequest) && (
                 <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
               )}
-              {verificationDialog.action === 'verify' ? 'Zweryfikuj' : 'Odrzuć'}
+              {verificationDialog.action === "verify" ? "Zweryfikuj" : "Odrzuć"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle } from 'lucide-react';
+import { NarrowCol } from '@/components/layout/NarrowCol';
 
 export const ForgotPasswordPage: React.FC = () => {
   const { mutate: forgotPassword, isLoading, error, isSuccess } = useForgotPassword();
@@ -18,8 +19,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <NarrowCol>
           <Card>
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
@@ -45,14 +45,12 @@ export const ForgotPasswordPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
+      </NarrowCol>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <NarrowCol>
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Resetuj hasło</CardTitle>
@@ -99,7 +97,6 @@ export const ForgotPasswordPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </NarrowCol>
   );
 };

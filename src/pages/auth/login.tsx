@@ -1,14 +1,21 @@
 // LoginPage.tsx - Ulepszona wersja z lepszą obsługą błędów
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertTriangle, Info, Mail, Lock } from 'lucide-react';
-import { NarrowCol } from '@/components/layout/NarrowCol';
-import { Lead } from '@/components/reader';
-import { useLoginForm } from '@/utility/useLoginForm'; // Import custom hook
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, AlertTriangle, Info, Mail, Lock } from "lucide-react";
+import { NarrowCol } from "@/components/layout/NarrowCol";
+import { Lead } from "@/components/reader";
+import { useLoginForm } from "@/utility/useLoginForm"; // Import custom hook
+import { Link } from "react-router-dom";
 
 export const LoginPage: React.FC = () => {
   const {
@@ -18,7 +25,7 @@ export const LoginPage: React.FC = () => {
     setPassword,
     isLoading,
     error,
-    handleSubmit
+    handleSubmit,
   } = useLoginForm();
 
   // Funkcja sprawdzająca czy formularz jest prawidłowy
@@ -41,8 +48,8 @@ export const LoginPage: React.FC = () => {
 
   return (
     <NarrowCol>
-      <Lead title={`Logowanie`} description={`Wprowadź swoje dane aby kontynuować`} />
-      
+    
+
       <Card>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
@@ -50,7 +57,7 @@ export const LoginPage: React.FC = () => {
             Wprowadź swoje dane aby się zalogować
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -66,10 +73,12 @@ export const LoginPage: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
-                className={error && error.includes("email") ? "border-red-500" : ""}
+                className={
+                  error && error.includes("email") ? "border-red-500" : ""
+                }
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password" className="flex items-center">
                 <Lock className="mr-2 h-4 w-4" />
@@ -83,35 +92,48 @@ export const LoginPage: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 required
-                className={error && error.includes("hasło") ? "border-red-500" : ""}
+                className={
+                  error && error.includes("hasło") ? "border-red-500" : ""
+                }
               />
             </div>
 
             {/* Wyświetlanie błędów */}
             {error && (
               <Alert variant={getErrorVariant(error) as any}>
-                {React.createElement(getErrorIcon(error), { className: "h-4 w-4" })}
+                {React.createElement(getErrorIcon(error), {
+                  className: "h-4 w-4",
+                })}
                 <AlertDescription>
                   <strong>Błąd logowania:</strong> {error}
-                  
                   {/* Dodatkowe wskazówki w zależności od typu błędu */}
                   {error.includes("nie zostało potwierdzone") && (
                     <div className="mt-2 text-sm">
-                      <p>💡 <strong>Co robić:</strong></p>
+                      <p>
+                        💡 <strong>Co robić:</strong>
+                      </p>
                       <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Sprawdź swoją skrzynkę email (także spam)</li>
                         <li>Kliknij link aktywacyjny w emailu</li>
-                        <li>Jeśli nie otrzymałeś emaila, możesz <a href="/resend-confirmation" className="underline">wysłać ponownie</a></li>
+                        <li>
+                          Jeśli nie otrzymałeś emaila, możesz{" "}
+                          <a href="/resend-confirmation" className="underline">
+                            wysłać ponownie
+                          </a>
+                        </li>
                       </ul>
                     </div>
                   )}
-                  
                   {error.includes("Nieprawidłowe dane") && (
                     <div className="mt-2 text-sm">
-                      <p>💡 <strong>Sprawdź:</strong></p>
+                      <p>
+                        💡 <strong>Sprawdź:</strong>
+                      </p>
                       <ul className="list-disc list-inside mt-1 space-y-1">
                         <li>Czy email jest wpisany poprawnie</li>
-                        <li>Czy hasło jest poprawne (uwaga na wielkość liter)</li>
+                        <li>
+                          Czy hasło jest poprawne (uwaga na wielkość liter)
+                        </li>
                         <li>Czy masz już założone konto</li>
                       </ul>
                     </div>
@@ -120,9 +142,9 @@ export const LoginPage: React.FC = () => {
               </Alert>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading || !isFormValid}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -133,35 +155,36 @@ export const LoginPage: React.FC = () => {
           {/* Linki pomocnicze */}
           <div className="mt-6 space-y-3">
             <div className="text-center text-sm">
-              <a 
-                href="/register/step1" 
-                className="text-blue-600 hover:text-blue-500 font-medium"
+              <Link
+                to="/register/step1"
+                className="text-blue-600 hover:text-blue-500"
               >
                 Nie masz konta? Zarejestruj się
-              </a>
+              </Link>
             </div>
-            
+
             <div className="text-center text-sm">
-              <a 
-                href="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="text-blue-600 hover:text-blue-500"
               >
                 Zapomniałeś hasła?
-              </a>
+              </Link>
             </div>
 
             {/* Dodatkowa pomoc */}
             <div className="border-t pt-4 mt-4">
               <div className="text-center text-xs text-gray-500">
                 <p>Problemy z logowaniem?</p>
-                <a href="/contact" className="text-blue-600 hover:text-blue-500">
+                <a
+                  href="/contact"
+                  className="text-blue-600 hover:text-blue-500"
+                >
                   Skontaktuj się z pomocą techniczną
                 </a>
               </div>
             </div>
           </div>
-
-          
         </CardContent>
       </Card>
     </NarrowCol>

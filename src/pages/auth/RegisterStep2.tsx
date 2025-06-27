@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, KeyRound } from "lucide-react";
 import { SchemaForm } from "@/components/SchemaForm";
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
@@ -23,8 +23,14 @@ export const RegisterStep2: React.FC = () => {
 
   return (
     <NarrowCol>
-      <Lead title={`Rejestracja`} description={`2 z 3 Ustaw hasło do konta`} />
-
+     
+      <div className="flex items-start gap-5 ">
+        <KeyRound className="mt-2 bg-white rounded-full p-2 w-12 h-12" />
+        <Lead
+          title={`Rejestracja`}
+          description={`2 z 3 Ustaw hasło do konta`}
+        />
+      </div>
       <SchemaForm
         schemaPath="registration.step2"
         onSubmit={handleSubmit}

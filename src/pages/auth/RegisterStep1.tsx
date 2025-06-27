@@ -3,7 +3,9 @@ import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
 import { SchemaForm } from "@/components/SchemaForm";
 import { useFormSchemaStore } from "@/utility/formSchemaStore";
+import { UserPlus } from "lucide-react";
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 export const RegisterStep1: React.FC = () => {
@@ -34,7 +36,10 @@ export const RegisterStep1: React.FC = () => {
                   label: "Beneficjent - zakładajacy zlecenie",
                 },
                 { value: "auditor", label: "Auditor - opiniujacy zlecenie" },
-                { value: "contractor", label: "Wykonawca - realizujacy zlecenie" },
+                {
+                  value: "contractor",
+                  label: "Wykonawca - realizujacy zlecenie",
+                },
               ],
             },
           },
@@ -82,10 +87,13 @@ export const RegisterStep1: React.FC = () => {
 
   return (
     <NarrowCol>
-      <Lead
-        title={`Rejestracja`}
-        description={`1 z 3 Podaj podstawowe informacje`}
-      />
+      <div className="flex items-start gap-5 ">
+        <UserPlus className="mt-2 bg-white rounded-full p-2 w-12 h-12" />
+        <Lead
+          title={`Rejestracja`}
+          description={`1 z 3 Podaj podstawowe informacje`}
+        />
+      </div>
 
       <SchemaForm
         schemaPath="registration.step1"
@@ -94,9 +102,9 @@ export const RegisterStep1: React.FC = () => {
       />
 
       <div className="mt-4 text-center">
-        <a href="/login" className="text-blue-600 hover:text-blue-500 text-sm">
+        <Link to="/login" className="text-blue-600 hover:text-blue-500 text-sm">
           Masz już konto? Zaloguj się
-        </a>
+        </Link>
       </div>
     </NarrowCol>
   );
