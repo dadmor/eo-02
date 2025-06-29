@@ -2,22 +2,9 @@ import { useGetIdentity } from "@refinedev/core";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "lucide-react";
+import { UserData } from "@/operatorTypes";
 
-interface UserData {
-  id?: string;
-  name?: string;
-  email?: string;
-  avatar?: string;
-  user_metadata?: {
-    role?: string;
-    email?: string;
-    email_verified?: boolean;
-    phone_verified?: boolean;
-    sub?: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
-}
+
 
 interface UserProfileProps {
   className?: string;
@@ -25,10 +12,6 @@ interface UserProfileProps {
 
 export const UserMicroProfile: React.FC<UserProfileProps> = ({ className }) => {
   const { data: user, isLoading, error } = useGetIdentity<UserData>();
-
-  // Debug - usuń po sprawdzeniu
-  console.log('User data:', user);
-  console.log('User user_metadata:', user?.user_metadata);
 
   if (isLoading) {
     return (
@@ -44,7 +27,9 @@ export const UserMicroProfile: React.FC<UserProfileProps> = ({ className }) => {
 
   if (error) {
     return (
-      <div className={`flex items-center space-x-3 p-3 text-destructive ${className}`}>
+      <div
+        className={`flex items-center space-x-3 p-3 text-destructive ${className}`}
+      >
         <User className="h-6 w-6" />
         <div className="text-sm">
           <div className="font-medium">Błąd danych</div>
@@ -56,7 +41,9 @@ export const UserMicroProfile: React.FC<UserProfileProps> = ({ className }) => {
 
   if (!user) {
     return (
-      <div className={`flex items-center space-x-3 p-3 text-muted-foreground ${className}`}>
+      <div
+        className={`flex items-center space-x-3 p-3 text-muted-foreground ${className}`}
+      >
         <User className="h-6 w-6" />
         <div className="text-sm">
           <div className="font-medium">Brak danych</div>
@@ -70,19 +57,19 @@ export const UserMicroProfile: React.FC<UserProfileProps> = ({ className }) => {
   const getInitials = (name?: string, email?: string) => {
     if (name) {
       return name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
         .toUpperCase()
         .slice(0, 2);
     }
     if (email) {
       return email.slice(0, 2).toUpperCase();
     }
-    return 'U';
+    return "U";
   };
 
-  const displayName = user.name || user.email || 'Użytkownik';
+  const displayName = user.name || user.email || "Użytkownik";
   const initials = getInitials(user.name, user.email);
 
   // Rola znajduje się w user_metadata
@@ -101,7 +88,10 @@ export const UserMicroProfile: React.FC<UserProfileProps> = ({ className }) => {
           {displayName}
         </div>
         {user.email && (
-          <div className="text-xs text-muted-foreground truncate" title={user.email}>
+          <div
+            className="text-xs text-muted-foreground truncate"
+            title={user.email}
+          >
             {user.email}
           </div>
         )}
@@ -110,7 +100,6 @@ export const UserMicroProfile: React.FC<UserProfileProps> = ({ className }) => {
             Rola: {role}
           </div>
         )}
-        
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import { ArrowLeft, Calculator, Phone, MapPin, Users, Euro, AlertCircle } from "
 import { Button, Input, Label } from "@/components/ui";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const ContactOperator = () => {
   const { list } = useNavigation();

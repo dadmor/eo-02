@@ -4,10 +4,12 @@ import { Menu } from "../menu";
 import { Button } from "@/components/ui/button";
 import { Menu as MenuIcon, X } from "lucide-react";
 import { Breadcrumb } from "../navigation";
+import { useGetIdentity } from "@refinedev/core";
 
 export const Layout: React.FC<PropsWithChildren> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [opacity, setOpacity] = useState(1);
+  const { data: user, isLoading, error } = useGetIdentity<UserData>();
 
   useEffect(() => {
     const handleScroll = () => {

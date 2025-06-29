@@ -23,7 +23,7 @@ import {
   Image
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const AuditorDashboard = () => {
   const navigate = useNavigate();

@@ -26,7 +26,7 @@ import {
   Building
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 // Type definitions
 interface BaseRequest {

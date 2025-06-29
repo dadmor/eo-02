@@ -1,6 +1,7 @@
 // src/pages/beneficiary/index.tsx
 import React from "react";
 import { Route } from "react-router-dom";
+import { RoleGuard } from "@/components/RoleGuard";
 
 // Import komponentów
 import { AuditRequestCreate } from "./audit-request-create";
@@ -26,7 +27,18 @@ export const AuditRequestEdit = () => {
   return <div>Audit Request Edit - do implementacji</div>;
 };
 
-
+// Helper function do tworzenia chronionej trasy
+const createProtectedRoute = (
+  key: string,
+  path: string,
+  element: React.ReactElement
+) => (
+  <Route
+    key={key}
+    path={path}
+    element={<RoleGuard allowedRoles={["beneficiary"]}>{element}</RoleGuard>}
+  />
+);
 
 // Resource definitions dla Refine
 export const beneficiaryResources = [
@@ -49,17 +61,7 @@ export const beneficiaryResources = [
       icon: "🔧",
     },
   },
-  {
-    name: "audit_requests", 
-    list: "/beneficiary/audit-requests",
-    create: "/beneficiary/audit-request/create",
-    edit: "/beneficiary/audit-request/edit/:id", 
-    show: "/beneficiary/audit-request/show/:id",
-    meta: {
-      label: "Zlecenia audytowe",
-      icon: "📋",
-    },
-  },
+  
   {
     name: "contact_operator",
     list: "/beneficiary/contact-operator",
@@ -71,67 +73,66 @@ export const beneficiaryResources = [
   },
 ];
 
-// Routes dla beneficjenta
+// Routes dla beneficjenta z RoleGuard
 export const beneficiaryRoutes = [
-  <Route
-    key="beneficiary-dashboard"
-    path="/beneficiary"
-    element={<BeneficiaryDashboard />}
-  />,
-  <Route
-    key="beneficiary-contact-operator"
-    path="/beneficiary/contact-operator"
-    element={<ContactOperator />}
-  />,
-  <Route
-    key="beneficiary-my-requests"
-    path="/beneficiary/my-requests"
-    element={<MyRequests />}
-  />,
-  <Route
-    key="beneficiary-service-requests"
-    path="/beneficiary/service-requests"
-    element={<MyRequests />}
-  />,
-  <Route
-    key="beneficiary-audit-requests"
-    path="/beneficiary/audit-requests"
-    element={<MyRequests />}
-  />,
-  <Route
-    key="service-request-create"
-    path="/beneficiary/service-request/create"
-    element={<ServiceRequestCreate />}
-  />,
-  <Route
-    key="service-request-edit"
-    path="/beneficiary/service-request/edit/:id"
-    element={<ServiceRequestEdit />}
-  />,
-  <Route
-    key="service-request-show"
-    path="/beneficiary/service-request/show/:id"
-    element={<RequestDetails />}
-  />,
-  <Route
-    key="audit-request-create"
-    path="/beneficiary/audit-request/create" 
-    element={<AuditRequestCreate />}
-  />,
-  <Route
-    key="audit-request-edit"
-    path="/beneficiary/audit-request/edit/:id"
-    element={<AuditRequestEdit />}
-  />,
-  <Route
-    key="audit-request-show"
-    path="/beneficiary/audit-request/show/:id"
-    element={<RequestDetails />}
-  />,
-  // DODANY ROUTE do widoku szczegółów (naprawia problem z brakiem widoku)
-  <Route
-    key="request-details"
-    path="/beneficiary/requests/:id"
-    element={<RequestDetails />}
-  />,
+  createProtectedRoute(
+    "beneficiary-dashboard",
+    "/beneficiary",
+    <BeneficiaryDashboard />
+  ),
+  createProtectedRoute(
+    "beneficiary-contact-operator",
+    "/beneficiary/contact-operator",
+    <ContactOperator />
+  ),
+  createProtectedRoute(
+    "beneficiary-my-requests",
+    "/beneficiary/my-requests",
+    <MyRequests />
+  ),
+  createProtectedRoute(
+    "beneficiary-service-requests",
+    "/beneficiary/service-requests",
+    <MyRequests />
+  ),
+  createProtectedRoute(
+    "beneficiary-audit-requests",
+    "/beneficiary/audit-requests",
+    <MyRequests />
+  ),
+  createProtectedRoute(
+    "service-request-create",
+    "/beneficiary/service-request/create",
+    <ServiceRequestCreate />
+  ),
+  createProtectedRoute(
+    "service-request-edit",
+    "/beneficiary/service-request/edit/:id",
+    <ServiceRequestEdit />
+  ),
+  createProtectedRoute(
+    "service-request-show",
+    "/beneficiary/service-request/show/:id",
+    <RequestDetails />
+  ),
+  createProtectedRoute(
+    "audit-request-create",
+    "/beneficiary/audit-request/create",
+    <AuditRequestCreate />
+  ),
+  createProtectedRoute(
+    "audit-request-edit",
+    "/beneficiary/audit-request/edit/:id",
+    <AuditRequestEdit />
+  ),
+  createProtectedRoute(
+    "audit-request-show",
+    "/beneficiary/audit-request/show/:id",
+    <RequestDetails />
+  ),
+  createProtectedRoute(
+    "request-details",
+    "/beneficiary/requests/:id",
+    <RequestDetails />
+  ),
 ];

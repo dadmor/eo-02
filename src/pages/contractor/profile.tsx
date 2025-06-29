@@ -21,7 +21,7 @@ import {
   Hammer
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const ContractorProfile = () => {
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);

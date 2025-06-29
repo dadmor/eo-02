@@ -1,8 +1,7 @@
-// ========================================
-// src/pages/auditor/index.tsx - Zaktualizowany
-// ========================================
+// src/pages/auditor/index.tsx
 import React from "react";
 import { Route } from "react-router-dom";
+import { RoleGuard } from "@/components/RoleGuard";
 
 // Import komponentów
 import { AuditorDashboard } from "./dashboard";
@@ -40,6 +39,19 @@ export const PortfolioItemCreate = () => {
 export const PortfolioItemEdit = () => {
   return <div>Portfolio Item Edit - do implementacji</div>;
 };
+
+// Helper function do tworzenia chronionej trasy
+const createProtectedRoute = (key: string, path: string, element: React.ReactElement) => (
+  <Route
+    key={key}
+    path={path}
+    element={
+      <RoleGuard allowedRoles={["auditor"]}>
+        {element}
+      </RoleGuard>
+    }
+  />
+);
 
 // Resource definitions dla Refine
 export const auditorResources = [
@@ -93,61 +105,17 @@ export const auditorResources = [
   },
 ];
 
-// Routes dla audytora
+// Routes dla audytora z RoleGuard
 export const auditorRoutes = [
-  <Route
-    key="auditor-dashboard"
-    path="/auditor"
-    element={<AuditorDashboard />}
-  />,
-  <Route
-    key="auditor-available-requests"
-    path="/auditor/available-requests"
-    element={<AvailableRequests />}
-  />,
-  <Route
-    key="auditor-my-offers"
-    path="/auditor/my-offers"
-    element={<MyOffers />}
-  />,
-  <Route
-    key="auditor-profile"
-    path="/auditor/profile"
-    element={<AuditorProfile />}
-  />,
-  <Route
-    key="auditor-portfolio"
-    path="/auditor/portfolio"
-    element={<AuditorPortfolio />}
-  />,
-  <Route
-    key="auditor-completed-audits"
-    path="/auditor/completed-audits"
-    element={<CompletedAudits />}
-  />,
-  <Route
-    key="auditor-request-details"
-    path="/auditor/request/:id"
-    element={<RequestDetails />}
-  />,
-  <Route
-    key="auditor-offer-create"
-    path="/auditor/offer/create/:requestId"
-    element={<OfferCreate />}
-  />,
-  <Route
-    key="auditor-offer-edit"
-    path="/auditor/offer/edit/:id"
-    element={<OfferEdit />}
-  />,
-  <Route
-    key="portfolio-item-create"
-    path="/auditor/portfolio/create"
-    element={<PortfolioItemCreate />}
-  />,
-  <Route
-    key="portfolio-item-edit"
-    path="/auditor/portfolio/edit/:id"
-    element={<PortfolioItemEdit />}
-  />,
+  createProtectedRoute("auditor-dashboard", "/auditor", <AuditorDashboard />),
+  createProtectedRoute("auditor-available-requests", "/auditor/available-requests", <AvailableRequests />),
+  createProtectedRoute("auditor-my-offers", "/auditor/my-offers", <MyOffers />),
+  createProtectedRoute("auditor-profile", "/auditor/profile", <AuditorProfile />),
+  createProtectedRoute("auditor-portfolio", "/auditor/portfolio", <AuditorPortfolio />),
+  createProtectedRoute("auditor-completed-audits", "/auditor/completed-audits", <CompletedAudits />),
+  createProtectedRoute("auditor-request-details", "/auditor/request/:id", <RequestDetails />),
+  createProtectedRoute("auditor-offer-create", "/auditor/offer/create/:requestId", <OfferCreate />),
+  createProtectedRoute("auditor-offer-edit", "/auditor/offer/edit/:id", <OfferEdit />),
+  createProtectedRoute("portfolio-item-create", "/auditor/portfolio/create", <PortfolioItemCreate />),
+  createProtectedRoute("portfolio-item-edit", "/auditor/portfolio/edit/:id", <PortfolioItemEdit />),
 ];

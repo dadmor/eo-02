@@ -17,7 +17,7 @@ import {
   Calculator
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const BeneficiaryDashboard = () => {
   const navigate = useNavigate();
@@ -243,9 +243,148 @@ export const BeneficiaryDashboard = () => {
             </CardContent>
           </Card>
 
+        
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Phone className="w-5 h-5" />
+              Kontakt z operatorem
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Potrzebujesz pomocy z programem? Umów się na rozmowę z operatorem.
+            </p>
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/beneficiary/contact-operator')}
+              >
+                <Phone className="w-4 h-4 mr-2" />
+                Umów rozmowę
+              </Button>
+              {contacts.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Ostatni kontakt: {new Date(contacts[0].created_at).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Proces termomodernizacji</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>1. Sprawdź wysokość dotacji</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>2. Zamów audyt energetyczny</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>3. Wybierz wykonawcę</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>4. Realizuj inwestycję</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                <span>5. Odbierz dotację</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+
+       
+      </GridBox>
+
+      {/* Dodatkowe informacje */}
+      <GridBox className="grid-cols-1 md:grid-cols-2">
+
+         {/* Ostatnie zlecenia */}
+         <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <FlexBox>
+                <CardTitle>Ostatnie zlecenia</CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/beneficiary/my-requests')}
+                >
+                  Zobacz wszystkie
+                </Button>
+              </FlexBox>
+            </CardHeader>
+            <CardContent>
+              {recentRequests.length > 0 ? (
+                <div className="space-y-4">
+                  {recentRequests.map((request: any) => {
+                    const isService = 'heat_source' in request;
+                    return (
+                      <div key={request.id} className="border rounded-lg p-4">
+                        <FlexBox className="mb-2">
+                          <div>
+                            <Badge variant={isService ? 'default' : 'secondary'}>
+                              {isService ? 'Wykonawca' : 'Audytor'}
+                            </Badge>
+                            <Badge 
+                              variant="outline" 
+                              className={
+                                request.status === 'pending' ? 'border-yellow-500 text-yellow-700' :
+                                request.status === 'verified' ? 'border-green-500 text-green-700' :
+                                request.status === 'completed' ? 'border-blue-500 text-blue-700' :
+                                'border-red-500 text-red-700'
+                              }
+                            >
+                              {request.status === 'pending' ? 'Oczekujące' :
+                               request.status === 'verified' ? 'Zweryfikowane' : 
+                               request.status === 'completed' ? 'Ukończone' : 'Odrzucone'}
+                            </Badge>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/beneficiary/requests/${request.id}`)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </FlexBox>
+                        <div className="text-sm">
+                          <div className="font-medium">{request.city}, {request.street_address}</div>
+                          <div className="text-muted-foreground">
+                            {new Date(request.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Nie masz jeszcze żadnych zleceń</p>
+                  <p className="text-sm">Utwórz pierwsze zlecenie, aby rozpocząć</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
           {/* Wynik kalkulatora jeśli istnieje */}
           {hasCalculatorResult && (
-            <Card className="mt-4">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calculator className="w-5 h-5" />
@@ -318,139 +457,10 @@ export const BeneficiaryDashboard = () => {
               </CardContent>
             </Card>
           )}
-        </div>
 
-        {/* Ostatnie zlecenia */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <FlexBox>
-                <CardTitle>Ostatnie zlecenia</CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate('/beneficiary/my-requests')}
-                >
-                  Zobacz wszystkie
-                </Button>
-              </FlexBox>
-            </CardHeader>
-            <CardContent>
-              {recentRequests.length > 0 ? (
-                <div className="space-y-4">
-                  {recentRequests.map((request: any) => {
-                    const isService = 'heat_source' in request;
-                    return (
-                      <div key={request.id} className="border rounded-lg p-4">
-                        <FlexBox className="mb-2">
-                          <div>
-                            <Badge variant={isService ? 'default' : 'secondary'}>
-                              {isService ? 'Wykonawca' : 'Audytor'}
-                            </Badge>
-                            <Badge 
-                              variant="outline" 
-                              className={
-                                request.status === 'pending' ? 'border-yellow-500 text-yellow-700' :
-                                request.status === 'verified' ? 'border-green-500 text-green-700' :
-                                request.status === 'completed' ? 'border-blue-500 text-blue-700' :
-                                'border-red-500 text-red-700'
-                              }
-                            >
-                              {request.status === 'pending' ? 'Oczekujące' :
-                               request.status === 'verified' ? 'Zweryfikowane' : 
-                               request.status === 'completed' ? 'Ukończone' : 'Odrzucone'}
-                            </Badge>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/beneficiary/requests/${request.id}`)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </FlexBox>
-                        <div className="text-sm">
-                          <div className="font-medium">{request.city}, {request.street_address}</div>
-                          <div className="text-muted-foreground">
-                            {new Date(request.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nie masz jeszcze żadnych zleceń</p>
-                  <p className="text-sm">Utwórz pierwsze zlecenie, aby rozpocząć</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </GridBox>
 
-      {/* Dodatkowe informacje */}
-      <GridBox className="grid-cols-1 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="w-5 h-5" />
-              Kontakt z operatorem
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Potrzebujesz pomocy z programem? Umów się na rozmowę z operatorem.
-            </p>
-            <div className="space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/beneficiary/contact-operator')}
-              >
-                <Phone className="w-4 h-4 mr-2" />
-                Umów rozmowę
-              </Button>
-              {contacts.length > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  Ostatni kontakt: {new Date(contacts[0].created_at).toLocaleDateString()}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Proces termomodernizacji</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>1. Sprawdź wysokość dotacji</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>2. Zamów audyt energetyczny</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>3. Wybierz wykonawcę</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>4. Realizuj inwestycję</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                <span>5. Odbierz dotację</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    
+       
       </GridBox>
     </>
   );

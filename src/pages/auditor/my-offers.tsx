@@ -22,7 +22,7 @@ import {
   X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const MyOffers = () => {
   const navigate = useNavigate();

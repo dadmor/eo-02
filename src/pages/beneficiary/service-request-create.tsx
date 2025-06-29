@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 import { ArrowLeft, Home, MapPin, Phone, Wrench, Thermometer, Square, FileText, Upload } from "lucide-react";
 import { Button, Input, Label } from "@/components/ui";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const ServiceRequestCreate = () => {
   const { list } = useNavigation();

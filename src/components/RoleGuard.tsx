@@ -1,5 +1,6 @@
 import React from 'react';
 import { useGetIdentity } from '@refinedev/core';
+import { UserData } from '@/operatorTypes';
 
 interface RoleGuardProps {
   allowedRoles: string[];
@@ -10,15 +11,25 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   allowedRoles,
   children,
 }) => {
-  const { data: identity, isLoading } = useGetIdentity();
+  const { data: user, isLoading, error } = useGetIdentity<UserData>();
 
   if (isLoading) {
     return <div>Sprawdzanie uprawnień...</div>;
   }
 
-  const userRole = identity?.user_metadata?.role;
+  if (error) {
+    return (
+      <div>
+        <h3>Błąd</h3>
+        <p>Nie udało się sprawdzić uprawnień.</p>
+      </div>
+    );
+  }
 
-  if (!userRole || !allowedRoles.includes(userRole)) {
+  // Rola znajduje się w user_metadata
+  const role = user?.user_metadata?.role;
+
+  if (!role || !allowedRoles.includes(role)) {
     return (
       <div>
         <h3>Brak uprawnień</h3>

@@ -24,7 +24,7 @@ import {
   Briefcase
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Identity } from "../operatorTypes";
+import { Identity } from "../../operatorTypes";
 
 export const AuditorProfile = () => {
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
