@@ -1,5 +1,5 @@
 // ========================================
-// src/pages/contractor/index.tsx - Updated with Portfolio View
+// src/pages/contractor/index.tsx - UPDATED WITH REAL COMPONENTS
 // ========================================
 import React from "react";
 import { Route } from "react-router-dom";
@@ -15,6 +15,12 @@ import { ContractorAvailableRequests } from "./available-requests";
 import { ContractorMyOffers } from "./my-offers";
 import { ContractorPortfolioItemCreate } from "./portfolio-item-create";
 
+// ✅ NOWE: Import prawdziwych komponentów
+import { ContractorOfferCreate } from "./offer-create";
+import { ContractorOfferEdit } from "./offer-edit";
+import { ContractorOfferShow } from "./offer-show";
+import { ContractorRequestDetails } from "./request-details";
+
 // Export wszystkich komponentów
 export { ContractorDashboard } from "./dashboard";
 export { ContractorProfile } from "./profile";
@@ -22,40 +28,17 @@ export { ContractorPortfolio } from "./portfolio";
 export { ContractorPortfolioItemView } from "./portfolio-item-view";
 export { ContractorAvailableRequests } from "./available-requests";
 export { ContractorMyOffers } from "./my-offers";
+export { ContractorOfferCreate } from "./offer-create";
+export { ContractorOfferEdit } from "./offer-edit";
+export { ContractorOfferShow } from "./offer-show";
+export { ContractorRequestDetails } from "./request-details";
 
-// Komponenty do implementacji
+// Komponenty do implementacji w przyszłości
 export const ContractorCompletedProjects = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Ukończone Projekty</h1>
       <p>Komponent do implementacji - historia ukończonych projektów</p>
-    </div>
-  );
-};
-
-export const ContractorOfferCreate = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Utwórz Ofertę</h1>
-      <p>Komponent do implementacji - formularz tworzenia oferty</p>
-    </div>
-  );
-};
-
-export const ContractorOfferEdit = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Edytuj Ofertę</h1>
-      <p>Komponente do implementacji - formularz edycji oferty</p>
-    </div>
-  );
-};
-
-export const ContractorRequestDetails = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Szczegóły Zlecenia</h1>
-      <p>Komponente do implementacji - szczegóły zlecenia</p>
     </div>
   );
 };
@@ -148,9 +131,13 @@ export const contractorRoutes = [
   createProtectedRoute("contractor-portfolio", "/contractor/portfolio", <ContractorPortfolio />),
   createProtectedRoute("contractor-portfolio-view", "/contractor/portfolio/:id", <ContractorPortfolioItemView />),
   createProtectedRoute("contractor-completed-projects", "/contractor/completed-projects", <ContractorCompletedProjects />),
+  
+  // ✅ NOWE: Prawdziwe komponenty zamiast placeholder'ów
   createProtectedRoute("contractor-request-details", "/contractor/request/:id", <ContractorRequestDetails />),
   createProtectedRoute("contractor-offer-create", "/contractor/offer/create/:requestId", <ContractorOfferCreate />),
+  createProtectedRoute("contractor-offer-show", "/contractor/offer/:id", <ContractorOfferShow />),
   createProtectedRoute("contractor-offer-edit", "/contractor/offer/edit/:id", <ContractorOfferEdit />),
+  
   createProtectedRoute("contractor-portfolio-item-create", "/contractor/portfolio/create", <ContractorPortfolioItemCreate />),
   createProtectedRoute("contractor-portfolio-item-edit", "/contractor/portfolio/edit/:id", <ContractorPortfolioItemEdit />),
 ];
