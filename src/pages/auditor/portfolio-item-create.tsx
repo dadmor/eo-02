@@ -2,7 +2,7 @@
 // src/pages/auditor/portfolio-item-create.tsx
 // ========================================
 
-import { useForm } from "@refinedev/react-hook-form";
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { useCreate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,8 +73,8 @@ export const PortfolioItemCreate = () => {
       energy_class_before: "",
       energy_class_after: "",
       main_image_url: "",
-      additional_images: [] as string[], // Explicit type assertion
-      key_features: [] as string[], // Explicit type assertion
+      additional_images: [],
+      key_features: [],
       is_featured: false,
     },
   });
@@ -142,7 +142,7 @@ export const PortfolioItemCreate = () => {
     setValue("additional_images", newImages);
   };
 
-  const handleFormSubmit = (data: PortfolioFormData) => {
+  const handleFormSubmit: SubmitHandler<PortfolioFormData> = (data:PortfolioFormData) => {
     if (!userId) {
       console.error("User not authenticated");
       return;
