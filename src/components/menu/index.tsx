@@ -1,3 +1,5 @@
+// src/components/Menu.tsx
+import React from "react";
 import { useLogout, useMenu } from "@refinedev/core";
 import { NavLink } from "react-router";
 import { LogOut, Menu as MenuIcon, X } from "lucide-react";
@@ -58,7 +60,11 @@ export const Menu: React.FC<MenuProps> = ({ onClose }) => {
                 )
               }
             >
-              {item.icon && <span className="mr-3">{item.icon}</span>}
+              {item.icon && (
+                <span className="mr-3 flex items-center">
+                  {React.isValidElement(item.icon) ? item.icon : item.icon}
+                </span>
+              )}
               {item.label}
             </NavLink>
           ))}

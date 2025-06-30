@@ -10,6 +10,7 @@ import { AuditorPortfolio } from "./portfolio";
 import { AvailableRequests } from "./available-requests";
 import { MyOffers } from "./my-offers";
 import { CompletedAudits } from "./completed-audits";
+import { PortfolioItemCreate } from "./portfolio-item-create";
 
 // Export wszystkich komponentów
 export { AuditorDashboard } from "./dashboard";
@@ -32,9 +33,7 @@ export const RequestDetails = () => {
   return <div>Request Details - do implementacji</div>;
 };
 
-export const PortfolioItemCreate = () => {
-  return <div>Portfolio Item Create - do implementacji</div>;
-};
+
 
 export const PortfolioItemEdit = () => {
   return <div>Portfolio Item Edit - do implementacji</div>;

@@ -1,5 +1,5 @@
 // ========================================
-// src/pages/auditor/portfolio.tsx - PRZEPROJEKTOWANE
+// src/pages/auditor/portfolio.tsx - FIXED VERSION
 // ========================================
 
 import { useState } from "react";
@@ -33,8 +33,8 @@ export const AuditorPortfolio = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -80,26 +80,35 @@ export const AuditorPortfolio = () => {
     },
   });
 
+  console.log("Portfolio items:", portfolioItems); // Debug log
+  console.log("Profile:", profile); // Debug log
+
   const hasProfile = profile?.data && profile.data.length > 0;
   const items = portfolioItems?.data || [];
+
+  // Debug - sprawdź strukturę danych
+  if (items.length > 0) {
+    console.log("First item structure:", items[0]);
+  }
 
   // Filtrowanie
   const filteredItems = items.filter(item => {
     const matchesSearch = !searchTerm || 
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+      (item.title && item.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.location && item.location.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesLocation = !locationFilter || item.location.includes(locationFilter);
-    const matchesType = !typeFilter || item.building_type === typeFilter;
+    const matchesLocation = locationFilter === "all" || (item.location && item.location.includes(locationFilter));
+    const matchesType = typeFilter === "all" || item.building_type === typeFilter;
     
     return matchesSearch && matchesLocation && matchesType;
   });
 
-  // Unikalne lokalizacje i typy
+  // Unikalne lokalizacje i typy - z zabezpieczeniem
   const uniqueLocations = [...new Set(items.map(item => {
+    if (!item.location) return "";
     return item.location.split(',')[1]?.trim() || item.location;
-  }))].sort();
+  }).filter(Boolean))].sort();
   
   const buildingTypes = [
     { value: "dom_jednorodzinny", label: "Dom jednorodzinny" },
@@ -107,6 +116,8 @@ export const AuditorPortfolio = () => {
     { value: "apartament", label: "Apartament" },
     { value: "budynek_komercyjny", label: "Budynek komercyjny" },
     { value: "budynek_przemyslowy", label: "Budynek przemysłowy" },
+    { value: "budynek_uslugowy", label: "Budynek usługowy" },
+    { value: "budynek_zabytkowy", label: "Budynek zabytkowy" },
     { value: "inny", label: "Inny" },
   ];
 
@@ -210,7 +221,7 @@ export const AuditorPortfolio = () => {
                   <SelectValue placeholder="Wszystkie regiony" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Wszystkie regiony</SelectItem>
+                  <SelectItem value="all">Wszystkie regiony</SelectItem>
                   {uniqueLocations.map(location => (
                     <SelectItem key={location} value={location}>{location}</SelectItem>
                   ))}
@@ -221,7 +232,7 @@ export const AuditorPortfolio = () => {
                   <SelectValue placeholder="Wszystkie typy" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Wszystkie typy</SelectItem>
+                  <SelectItem value="all">Wszystkie typy</SelectItem>
                   {buildingTypes.map(type => (
                     <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                   ))}
@@ -231,8 +242,8 @@ export const AuditorPortfolio = () => {
                 variant="outline" 
                 onClick={() => {
                   setSearchTerm("");
-                  setLocationFilter("");
-                  setTypeFilter("");
+                  setLocationFilter("all");
+                  setTypeFilter("all");
                 }}
               >
                 Wyczyść
@@ -275,7 +286,9 @@ export const AuditorPortfolio = () => {
                 <Calendar className="w-6 h-6 text-purple-600" />
                 <div>
                   <div className="text-xl font-bold">
-                    {new Date().getFullYear() - Math.min(...items.map(i => new Date(i.completion_date).getFullYear()))}
+                    {items.length > 0 && items.some(i => i.completion_date) 
+                      ? new Date().getFullYear() - Math.min(...items.filter(i => i.completion_date).map(i => new Date(i.completion_date).getFullYear()))
+                      : 0}
                   </div>
                   <div className="text-xs text-muted-foreground">Lat aktywności</div>
                 </div>
@@ -310,8 +323,12 @@ export const AuditorPortfolio = () => {
                   <div className="aspect-video bg-gray-100 overflow-hidden">
                     <img 
                       src={item.main_image_url} 
-                      alt={item.title}
+                      alt={item.title || "Portfolio item"}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                      onError={(e) => {
+                        // Ukryj obrazek jeśli się nie załaduje
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
@@ -321,11 +338,11 @@ export const AuditorPortfolio = () => {
                     {/* Nagłówek */}
                     <div>
                       <h3 className="font-medium text-lg line-clamp-2 mb-1">
-                        {item.title}
+                        {item.title || "Bez tytułu"}
                       </h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="w-3 h-3" />
-                        {item.location}
+                        {item.location || "Brak lokalizacji"}
                       </div>
                     </div>
 
@@ -356,6 +373,22 @@ export const AuditorPortfolio = () => {
                       <p className="text-sm text-gray-600 line-clamp-3">
                         {item.description}
                       </p>
+                    )}
+
+                    {/* Kluczowe cechy */}
+                    {item.key_features && Array.isArray(item.key_features) && item.key_features.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {item.key_features.slice(0, 3).map((feature: string, index: number) => (
+                          <Badge key={index} variant="outline" className="text-xs bg-blue-50 border-blue-200">
+                            {feature}
+                          </Badge>
+                        ))}
+                        {item.key_features.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{item.key_features.length - 3} więcej
+                          </Badge>
+                        )}
+                      </div>
                     )}
 
                     {/* Klasy energetyczne */}
@@ -433,8 +466,8 @@ export const AuditorPortfolio = () => {
                 variant="outline"
                 onClick={() => {
                   setSearchTerm("");
-                  setLocationFilter("");
-                  setTypeFilter("");
+                  setLocationFilter("all");
+                  setTypeFilter("all");
                 }}
               >
                 Wyczyść filtry
@@ -479,9 +512,9 @@ export const AuditorPortfolio = () => {
             <p>Czy na pewno chcesz usunąć ten projekt z portfolio? Ta akcja jest nieodwracalna.</p>
             {selectedItem && (
               <div className="p-3 bg-gray-50 rounded">
-                <div className="font-medium">{selectedItem.title}</div>
+                <div className="font-medium">{selectedItem.title || "Bez tytułu"}</div>
                 <div className="text-sm text-muted-foreground">
-                  {selectedItem.location}
+                  {selectedItem.location || "Brak lokalizacji"}
                 </div>
               </div>
             )}

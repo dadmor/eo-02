@@ -2,10 +2,13 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import { RoleGuard } from "@/components/RoleGuard";
+import { BarChart3, Wrench, ClipboardList, Phone } from "lucide-react";
 
 // Import komponentów
 import { AuditRequestCreate } from "./audit-request-create";
+import { AuditRequestEdit } from "./audit-request-edit";
 import { ServiceRequestCreate } from "./service-request-create";
+import { ServiceRequestEdit } from "./service-request-edit";
 import { MyRequests } from "./my-requests";
 import { BeneficiaryDashboard } from "./dashboard";
 import { ContactOperator } from "./contact-operator";
@@ -14,18 +17,12 @@ import { RequestDetails } from "./request-details";
 // Export wszystkich komponentów
 export { BeneficiaryDashboard } from "./dashboard";
 export { ServiceRequestCreate } from "./service-request-create";
+export { ServiceRequestEdit } from "./service-request-edit";
 export { AuditRequestCreate } from "./audit-request-create";
+export { AuditRequestEdit } from "./audit-request-edit";
 export { MyRequests } from "./my-requests";
 export { ContactOperator } from "./contact-operator";
-
-// Komponenty do implementacji
-export const ServiceRequestEdit = () => {
-  return <div>Service Request Edit - do implementacji</div>;
-};
-
-export const AuditRequestEdit = () => {
-  return <div>Audit Request Edit - do implementacji</div>;
-};
+export { RequestDetails } from "./request-details";
 
 // Helper function do tworzenia chronionej trasy
 const createProtectedRoute = (
@@ -46,29 +43,46 @@ export const beneficiaryResources = [
     name: "dashboard",
     list: "/beneficiary",
     meta: {
-      label: "Dashboard (b)",
-      icon: "📊",
+      label: "Dashboard",
+      icon: <BarChart3 className="h-4 w-4" />,
     },
   },
   {
-    name: "service_requests",
-    list: "/beneficiary/service-requests",
-    create: "/beneficiary/service-request/create",
-    edit: "/beneficiary/service-request/edit/:id",
-    show: "/beneficiary/service-request/show/:id",
+    name: "my_requests",
+    list: "/beneficiary/my-requests",
     meta: {
-      label: "Zlecenia serwisowe",
-      icon: "🔧",
+      label: "Moje zapytania",
+      icon: <ClipboardList className="h-4 w-4" />,
     },
   },
-  
+  {
+    name: "audit_request",
+    list: "/beneficiary/audit-request/create",
+    create: "/beneficiary/audit-request/create",
+    edit: "/beneficiary/audit-request/edit/:id",
+    meta: {
+      label: "Zapytanie o audyt",
+      icon: <BarChart3 className="h-4 w-4" />,
+      canDelete: false,
+    },
+  },
+  {
+    name: "service_request", 
+    list: "/beneficiary/service-request/create",
+    create: "/beneficiary/service-request/create",
+    edit: "/beneficiary/service-request/edit/:id",
+    meta: {
+      label: "Zapytanie o usługę",
+      icon: <Wrench className="h-4 w-4" />,
+      canDelete: false,
+    },
+  },
   {
     name: "contact_operator",
     list: "/beneficiary/contact-operator",
-    create: "/beneficiary/contact-operator",
     meta: {
       label: "Kontakt z operatorem",
-      icon: "📞",
+      icon: <Phone className="h-4 w-4" />,
     },
   },
 ];
