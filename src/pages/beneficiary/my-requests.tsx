@@ -23,7 +23,12 @@ import {
   Trash2,
   Star,
   MessageSquare,
-  Building
+  Building,
+  Users,
+  Euro,
+  ThumbsUp,
+  ThumbsDown,
+  AlertCircle
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Identity } from "../../operatorTypes";
@@ -64,12 +69,28 @@ interface AuditRequestWithType extends AuditRequest {
 
 type RequestWithType = ServiceRequestWithType | AuditRequestWithType;
 
+interface AuditorOffer {
+  id: string;
+  request_id: string;
+  auditor_id: string;
+  price: number;
+  duration_days: number;
+  status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'withdrawn';
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const MyRequests = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedRequest, setSelectedRequest] = useState<RequestWithType | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<AuditorOffer | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showOfferDialog, setShowOfferDialog] = useState(false);
+  const [showAcceptDialog, setShowAcceptDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [reviewData, setReviewData] = useState({ rating: 5, comment: "" });
   
   // Get authenticated user
@@ -78,6 +99,7 @@ export const MyRequests = () => {
   
   const { mutate: deleteRequest } = useDelete();
   const { mutate: updateRequest } = useUpdate();
+  const { mutate: updateOffer } = useUpdate();
   
   // Determine filter based on current path
   const currentPath = location.pathname;
@@ -108,7 +130,7 @@ export const MyRequests = () => {
     pagination: { mode: "off" },
     queryOptions: {
       enabled: !!userId && (requestType === 'all' || requestType === 'service'),
-      retry: 1, // Zmniejsz retry żeby szybciej zobaczyć błąd
+      retry: 1,
       retryDelay: 500,
     },
   });
@@ -132,30 +154,35 @@ export const MyRequests = () => {
     pagination: { mode: "off" },
     queryOptions: {
       enabled: !!userId && (requestType === 'all' || requestType === 'audit'),
-      retry: 1, // Zmniejsz retry żeby szybciej zobaczyć błąd
+      retry: 1,
       retryDelay: 500,
     },
   });
 
-  // TEMPORARILY DISABLED - Pobranie ofert dla zleceń (table doesn't exist)
-  const { data: offers } = useList({
-    resource: "offers",
-    filters: userId ? [
-      {
-        field: "beneficiary_id",
-        operator: "eq",
-        value: userId,
-      },
-    ] : [],
+  // ✅ NOWE: Pobranie ofert audytorów
+  const { data: auditorOffers, refetch: refetchOffers } = useList({
+    resource: "auditor_offers",
+    filters: [],
     pagination: { mode: "off" },
     queryOptions: {
-      enabled: false, // Disabled until offers table is created
+      enabled: !!userId && (requestType === 'all' || requestType === 'audit'),
+    },
+  });
+
+  // ✅ NOWE: Pobranie profili audytorów dla nazw firm
+  const { data: auditorProfiles } = useList({
+    resource: "auditor_profiles",
+    filters: [],
+    pagination: { mode: "off" },
+    queryOptions: {
+      enabled: !!userId && (requestType === 'all' || requestType === 'audit'),
     },
   });
 
   const serviceReqs = serviceRequests?.data || [];
   const auditReqs = auditRequests?.data || [];
-  const offersList = offers?.data || []; // Will be empty array since query is disabled
+  const offers = auditorOffers?.data || [];
+  const profiles = auditorProfiles?.data || [];
   
   // Filter based on current view
   let filteredRequests: RequestWithType[] = [];
@@ -177,6 +204,19 @@ export const MyRequests = () => {
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
+  // ✅ NOWE: Funkcje pomocnicze dla ofert audytorów
+  const getAuditorOffers = (requestId: string): AuditorOffer[] => {
+    return (offers as AuditorOffer[]).filter((offer: AuditorOffer) => offer.request_id === requestId);
+  };
+
+  const getAuditorProfile = (auditorId: string) => {
+    return (profiles as any[]).find((profile: any) => profile.auditor_id === auditorId);
+  };
+
+  const hasAcceptedOffer = (requestId: string): boolean => {
+    return getAuditorOffers(requestId).some(offer => offer.status === 'accepted');
+  };
+
   const stats = {
     total: allRequests.length,
     pending: allRequests.filter(r => r.status === 'pending').length,
@@ -194,6 +234,23 @@ export const MyRequests = () => {
         return <Badge variant="outline" className="border-blue-500 text-blue-700">Ukończone</Badge>;
       default:
         return <Badge variant="outline" className="border-red-500 text-red-700">Odrzucone</Badge>;
+    }
+  };
+
+  const getOfferStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="border-yellow-500 text-yellow-700 text-xs">Nowa</Badge>;
+      case 'accepted':
+        return <Badge className="bg-green-100 text-green-800 text-xs">Zaakceptowana</Badge>;
+      case 'rejected':
+        return <Badge variant="outline" className="border-red-500 text-red-700 text-xs">Odrzucona</Badge>;
+      case 'completed':
+        return <Badge className="bg-blue-100 text-blue-800 text-xs">Ukończona</Badge>;
+      case 'withdrawn':
+        return <Badge variant="outline" className="border-gray-500 text-gray-700 text-xs">Wycofana</Badge>;
+      default:
+        return <Badge variant="outline" className="text-xs">{status}</Badge>;
     }
   };
 
@@ -224,14 +281,12 @@ export const MyRequests = () => {
   };
 
   const canDelete = (request: RequestWithType) => {
-    const requestOffers = getRequestOffers(request);
+    const requestOffers = request.type === 'audit' ? getAuditorOffers(request.id) : [];
     return request.status === 'pending' && requestOffers.length === 0;
   };
 
-  const getRequestOffers = (request: RequestWithType) => {
-    return offersList.filter((o: any) => 
-      o.request_id === request.id && o.request_type === request.type
-    );
+  const canManageOffers = (request: RequestWithType) => {
+    return request.type === 'audit' && request.status === 'verified' && !hasAcceptedOffer(request.id);
   };
 
   const handleDelete = (request: RequestWithType) => {
@@ -289,22 +344,68 @@ export const MyRequests = () => {
     }
   };
 
-  // Debug logging
-  console.log('Debug info:', {
-    userId,
-    loadingSR,
-    loadingAR,
-    serviceRequests,
-    auditRequests,
-    serviceReqsData: serviceRequests?.data,
-    auditReqsData: auditRequests?.data,
-    errorSR,
-    errorAR,
-    requestType
-  });
+  // ✅ NOWE: Funkcje zarządzania ofertami audytorów
+  const handleViewOffer = (offer: AuditorOffer) => {
+    setSelectedOffer(offer);
+    setShowOfferDialog(true);
+  };
 
-  // Show loading state if user identity is not loaded yet OR if queries are still loading
-  // But allow rendering if at least one query completed successfully
+  const handleAcceptOffer = (offer: AuditorOffer) => {
+    setSelectedOffer(offer);
+    setShowAcceptDialog(true);
+  };
+
+  const handleRejectOffer = (offer: AuditorOffer) => {
+    setSelectedOffer(offer);
+    setShowRejectDialog(true);
+  };
+
+  const confirmAcceptOffer = () => {
+    if (selectedOffer) {
+      // Zaakceptuj wybraną ofertę
+      updateOffer({
+        resource: "auditor_offers",
+        id: selectedOffer.id,
+        values: { status: "accepted" }
+      }, {
+        onSuccess: () => {
+          // Odrzuć wszystkie pozostałe oferty dla tego zlecenia
+          const otherOffers = getAuditorOffers(selectedOffer.request_id)
+            .filter(offer => offer.id !== selectedOffer.id && offer.status === 'pending');
+          
+          otherOffers.forEach((offer: AuditorOffer) => {
+            updateOffer({
+              resource: "auditor_offers",
+              id: offer.id,
+              values: { status: "rejected" }
+            });
+          });
+
+          setShowAcceptDialog(false);
+          setSelectedOffer(null);
+          refetchOffers();
+        }
+      });
+    }
+  };
+
+  const confirmRejectOffer = () => {
+    if (selectedOffer) {
+      updateOffer({
+        resource: "auditor_offers",
+        id: selectedOffer.id,
+        values: { status: "rejected" }
+      }, {
+        onSuccess: () => {
+          setShowRejectDialog(false);
+          setSelectedOffer(null);
+          refetchOffers();
+        }
+      });
+    }
+  };
+
+  // Show loading state if user identity is not loaded yet
   const shouldShowLoading = !userId;
   
   if (shouldShowLoading) {
@@ -358,7 +459,6 @@ export const MyRequests = () => {
         </div>
       </FlexBox>
 
-     
       <FlexBox>
         <div></div>
         <div className="flex gap-2">
@@ -434,7 +534,9 @@ export const MyRequests = () => {
         {allRequests.length > 0 ? (
           <div className="space-y-4">
             {allRequests.map((request: RequestWithType) => {
-              const requestOffers = getRequestOffers(request);
+              const auditorOffersList = request.type === 'audit' ? getAuditorOffers(request.id) : [];
+              const hasOffers = auditorOffersList.length > 0;
+              const acceptedOffer = auditorOffersList.find(offer => offer.status === 'accepted');
               
               return (
                 <Card key={`${request.type}-${request.id}`}>
@@ -456,13 +558,19 @@ export const MyRequests = () => {
                             )}
                           </Badge>
                           {getStatusBadge(request.status)}
-                          {/* Temporarily hide offers count until offers table exists */}
-                          {/* {requestOffers.length > 0 && (
+                          {/* ✅ NOWE: Wyświetlanie liczby ofert audytorów */}
+                          {request.type === 'audit' && hasOffers && (
                             <Badge variant="outline" className="border-blue-500 text-blue-700">
                               <Users className="w-3 h-3 mr-1" />
-                              {requestOffers.length} ofert
+                              {auditorOffersList.length} ofert
                             </Badge>
-                          )} */}
+                          )}
+                          {acceptedOffer && (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Audytor wybrany
+                            </Badge>
+                          )}
                         </div>
                         <h3 className="font-medium text-lg">{request.city}, {request.street_address}</h3>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -498,8 +606,7 @@ export const MyRequests = () => {
                           </Button>
                         )}
                         
-                        {/* Temporarily hide review button until offers functionality is implemented */}
-                        {/* {request.status === 'verified' && requestOffers.length > 0 && !request.review_comment && (
+                        {request.status === 'completed' && !request.review_comment && (
                           <Button 
                             variant="outline"
                             size="sm"
@@ -507,7 +614,7 @@ export const MyRequests = () => {
                           >
                             <Star className="w-4 h-4 text-yellow-500" />
                           </Button>
-                        )} */}
+                        )}
                         
                         <Button 
                           variant="outline"
@@ -561,36 +668,85 @@ export const MyRequests = () => {
                     )}
                     
                     {/* Status information */}
-                    {request.status === 'verified' && (
+                    {request.status === 'verified' && request.type === 'audit' && !hasOffers && (
                       <div className="mb-3 text-sm text-green-700 bg-green-50 p-2 rounded">
-                        ✓ Zlecenie zweryfikowane - oczekuje na oferty
+                        ✓ Zlecenie zweryfikowane - oczekuje na oferty audytorów
                       </div>
                     )}
 
-                    {/* Temporarily hide offers section until offers table exists */}
-                    {requestOffers.length > 0 && (
+                    {/* ✅ NOWE: Wyświetlanie ofert audytorów */}
+                    {request.type === 'audit' && hasOffers && (
                       <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Otrzymane oferty:</h4>
+                        <h4 className="font-medium text-sm">Otrzymane oferty od audytorów:</h4>
                         <div className="space-y-2">
-                          {requestOffers.slice(0, 3).map((offer: any) => (
-                            <div key={offer.id} className="p-2 border rounded text-sm">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <div className="font-medium">{offer.company_name || offer.contractor_name}</div>
-                                  <div className="text-muted-foreground">
-                                    Cena: {offer.price?.toLocaleString()} zł
+                          {auditorOffersList.slice(0, 3).map((offer: AuditorOffer) => {
+                            const profile = getAuditorProfile(offer.auditor_id);
+                            
+                            return (
+                              <div key={offer.id} className="p-3 border rounded text-sm">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex-1">
+                                    <div className="font-medium">
+                                      {profile?.company_name || `Audytor ${offer.auditor_id.slice(0, 8)}`}
+                                    </div>
+                                    <div className="text-muted-foreground">
+                                      Cena: <span className="font-medium">{offer.price?.toLocaleString()} zł</span>
+                                    </div>
+                                    <div className="text-muted-foreground">
+                                      Czas realizacji: {offer.duration_days} dni
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      Złożona: {new Date(offer.created_at).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col items-end gap-2">
+                                    {getOfferStatusBadge(offer.status)}
+                                    
+                                    {/* Akcje dla ofert */}
+                                    {canManageOffers(request) && offer.status === 'pending' && (
+                                      <div className="flex gap-1">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleViewOffer(offer)}
+                                          className="h-7 px-2"
+                                        >
+                                          <Eye className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleAcceptOffer(offer)}
+                                          className="h-7 px-2 text-green-600 hover:text-green-700"
+                                        >
+                                          <ThumbsUp className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleRejectOffer(offer)}
+                                          className="h-7 px-2 text-red-600 hover:text-red-700"
+                                        >
+                                          <ThumbsDown className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {offer.status === 'pending' ? 'Nowa' : 
-                                   offer.status === 'accepted' ? 'Zaakceptowana' : 'Odrzucona'}
-                                </Badge>
+                                
+                                {offer.description && (
+                                  <div className="text-xs text-gray-600 mt-1 line-clamp-2">
+                                    {offer.description.slice(0, 150)}
+                                    {offer.description.length > 150 && '...'}
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))}
-                          {requestOffers.length > 3 && (
-                            <div className="text-xs text-muted-foreground">
-                              +{requestOffers.length - 3} więcej ofert
+                            );
+                          })}
+                          
+                          {auditorOffersList.length > 3 && (
+                            <div className="text-xs text-muted-foreground text-center py-2">
+                              +{auditorOffersList.length - 3} więcej ofert
                             </div>
                           )}
                         </div>
@@ -730,6 +886,187 @@ export const MyRequests = () => {
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Dodaj opinię
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ✅ NOWE: Dialog szczegółów oferty */}
+      <Dialog open={showOfferDialog} onOpenChange={setShowOfferDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Szczegóły oferty audytora</DialogTitle>
+          </DialogHeader>
+          {selectedOffer && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label>Firma audytora</Label>
+                  <div className="font-medium">
+                    {getAuditorProfile(selectedOffer.auditor_id)?.company_name || 
+                     `Audytor ${selectedOffer.auditor_id.slice(0, 8)}`}
+                  </div>
+                </div>
+                <div>
+                  <Label>Status oferty</Label>
+                  <div>{getOfferStatusBadge(selectedOffer.status)}</div>
+                </div>
+                <div>
+                  <Label>Cena</Label>
+                  <div className="flex items-center gap-2">
+                    <Euro className="w-4 h-4 text-green-600" />
+                    <span className="font-bold text-lg">{selectedOffer.price?.toLocaleString()} zł</span>
+                  </div>
+                </div>
+                <div>
+                  <Label>Czas realizacji</Label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="font-bold text-lg">{selectedOffer.duration_days} dni</span>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedOffer.description && (
+                <div className="space-y-2">
+                  <Label>Szczegółowy opis oferty</Label>
+                  <div className="bg-gray-50 p-4 rounded text-sm whitespace-pre-wrap max-h-64 overflow-y-auto">
+                    {selectedOffer.description}
+                  </div>
+                </div>
+              )}
+              
+              <div className="text-xs text-muted-foreground">
+                Oferta złożona: {new Date(selectedOffer.created_at).toLocaleDateString()}
+                {selectedOffer.updated_at !== selectedOffer.created_at && 
+                  ` • Ostatnia aktualizacja: ${new Date(selectedOffer.updated_at).toLocaleDateString()}`}
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowOfferDialog(false)}>
+                  Zamknij
+                </Button>
+                {canManageOffers(allRequests.find(r => getAuditorOffers(r.id).some(o => o.id === selectedOffer.id))!) && 
+                 selectedOffer.status === 'pending' && (
+                  <>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setShowOfferDialog(false);
+                        handleRejectOffer(selectedOffer);
+                      }}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <ThumbsDown className="w-4 h-4 mr-2" />
+                      Odrzuć
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        setShowOfferDialog(false);
+                        handleAcceptOffer(selectedOffer);
+                      }}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <ThumbsUp className="w-4 h-4 mr-2" />
+                      Zaakceptuj
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ✅ NOWE: Dialog akceptowania oferty */}
+      <Dialog open={showAcceptDialog} onOpenChange={setShowAcceptDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Zaakceptuj ofertę</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle className="w-5 h-5" />
+              <span className="font-medium">Potwierdzenie akceptacji oferty</span>
+            </div>
+            <p>Czy na pewno chcesz zaakceptować tę ofertę? Po akceptacji:</p>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+              <li>Wszystkie pozostałe oferty zostaną automatycznie odrzucone</li>
+              <li>Audytor otrzyma powiadomienie o akceptacji</li>
+              <li>Będziesz mógł skontaktować się z audytorem</li>
+              <li>Ta akcja jest nieodwracalna</li>
+            </ul>
+            
+            {selectedOffer && (
+              <div className="p-3 bg-green-50 rounded border border-green-200">
+                <div className="font-medium">
+                  {getAuditorProfile(selectedOffer.auditor_id)?.company_name || 
+                   `Audytor ${selectedOffer.auditor_id.slice(0, 8)}`}
+                </div>
+                <div className="text-sm">
+                  Cena: <span className="font-medium">{selectedOffer.price?.toLocaleString()} zł</span>
+                </div>
+                <div className="text-sm">
+                  Czas realizacji: {selectedOffer.duration_days} dni
+                </div>
+              </div>
+            )}
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAcceptDialog(false)}>
+                Anuluj
+              </Button>
+              <Button 
+                onClick={confirmAcceptOffer}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Zaakceptuj ofertę
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ✅ NOWE: Dialog odrzucania oferty */}
+      <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Odrzuć ofertę</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertCircle className="w-5 h-5" />
+              <span className="font-medium">Potwierdzenie odrzucenia oferty</span>
+            </div>
+            <p>Czy na pewno chcesz odrzucić tę ofertę? Audytor otrzyma powiadomienie o odrzuceniu.</p>
+            
+            {selectedOffer && (
+              <div className="p-3 bg-red-50 rounded border border-red-200">
+                <div className="font-medium">
+                  {getAuditorProfile(selectedOffer.auditor_id)?.company_name || 
+                   `Audytor ${selectedOffer.auditor_id.slice(0, 8)}`}
+                </div>
+                <div className="text-sm">
+                  Cena: <span className="font-medium">{selectedOffer.price?.toLocaleString()} zł</span>
+                </div>
+                <div className="text-sm">
+                  Czas realizacji: {selectedOffer.duration_days} dni
+                </div>
+              </div>
+            )}
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+                Anuluj
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={confirmRejectOffer}
+              >
+                <ThumbsDown className="w-4 h-4 mr-2" />
+                Odrzuć ofertę
               </Button>
             </div>
           </div>
