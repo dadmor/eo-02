@@ -1,5 +1,5 @@
 // ========================================
-// src/pages/contractor/portfolio.tsx
+// src/pages/contractor/portfolio.tsx - FIXED VERSION
 // ========================================
 
 import { useState } from "react";
@@ -36,8 +36,8 @@ export const ContractorPortfolio = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -93,8 +93,8 @@ export const ContractorPortfolio = () => {
       item.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesLocation = !locationFilter || item.location.includes(locationFilter);
-    const matchesType = !typeFilter || item.project_type === typeFilter;
+    const matchesLocation = locationFilter === "all" || item.location.includes(locationFilter);
+    const matchesType = typeFilter === "all" || item.project_type === typeFilter;
     
     return matchesSearch && matchesLocation && matchesType;
   });
@@ -217,7 +217,7 @@ export const ContractorPortfolio = () => {
                   <SelectValue placeholder="Wszystkie regiony" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Wszystkie regiony</SelectItem>
+                  <SelectItem value="all">Wszystkie regiony</SelectItem>
                   {uniqueLocations.map(location => (
                     <SelectItem key={location} value={location}>{location}</SelectItem>
                   ))}
@@ -228,7 +228,7 @@ export const ContractorPortfolio = () => {
                   <SelectValue placeholder="Wszystkie typy" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Wszystkie typy</SelectItem>
+                  <SelectItem value="all">Wszystkie typy</SelectItem>
                   {projectTypes.map(type => (
                     <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                   ))}
@@ -238,8 +238,8 @@ export const ContractorPortfolio = () => {
                 variant="outline" 
                 onClick={() => {
                   setSearchTerm("");
-                  setLocationFilter("");
-                  setTypeFilter("");
+                  setLocationFilter("all");
+                  setTypeFilter("all");
                 }}
               >
                 Wyczyść
@@ -450,8 +450,8 @@ export const ContractorPortfolio = () => {
                 variant="outline"
                 onClick={() => {
                   setSearchTerm("");
-                  setLocationFilter("");
-                  setTypeFilter("");
+                  setLocationFilter("all");
+                  setTypeFilter("all");
                 }}
               >
                 Wyczyść filtry

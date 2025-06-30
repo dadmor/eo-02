@@ -1,5 +1,5 @@
 // ========================================
-// src/pages/contractor/index.tsx - Kompletny plik
+// src/pages/contractor/index.tsx - Updated with Portfolio View
 // ========================================
 import React from "react";
 import { Route } from "react-router-dom";
@@ -10,6 +10,7 @@ import { BarChart3, Hammer, DollarSign, User, Folder } from "lucide-react";
 import { ContractorDashboard } from "./dashboard";
 import { ContractorProfile } from "./profile";
 import { ContractorPortfolio } from "./portfolio";
+import { ContractorPortfolioItemView } from "./portfolio-item-view";
 import { ContractorAvailableRequests } from "./available-requests";
 import { ContractorMyOffers } from "./my-offers";
 import { ContractorPortfolioItemCreate } from "./portfolio-item-create";
@@ -18,6 +19,7 @@ import { ContractorPortfolioItemCreate } from "./portfolio-item-create";
 export { ContractorDashboard } from "./dashboard";
 export { ContractorProfile } from "./profile";
 export { ContractorPortfolio } from "./portfolio";
+export { ContractorPortfolioItemView } from "./portfolio-item-view";
 export { ContractorAvailableRequests } from "./available-requests";
 export { ContractorMyOffers } from "./my-offers";
 
@@ -144,6 +146,7 @@ export const contractorRoutes = [
   createProtectedRoute("contractor-my-offers", "/contractor/my-offers", <ContractorMyOffers />),
   createProtectedRoute("contractor-profile", "/contractor/profile", <ContractorProfile />),
   createProtectedRoute("contractor-portfolio", "/contractor/portfolio", <ContractorPortfolio />),
+  createProtectedRoute("contractor-portfolio-view", "/contractor/portfolio/:id", <ContractorPortfolioItemView />),
   createProtectedRoute("contractor-completed-projects", "/contractor/completed-projects", <ContractorCompletedProjects />),
   createProtectedRoute("contractor-request-details", "/contractor/request/:id", <ContractorRequestDetails />),
   createProtectedRoute("contractor-offer-create", "/contractor/offer/create/:requestId", <ContractorOfferCreate />),

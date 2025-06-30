@@ -1,5 +1,5 @@
 // ========================================
-// src/pages/contractor/portfolio-item-create.tsx
+// src/pages/contractor/portfolio-item-create.tsx - FIXED VERSION
 // ========================================
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -32,28 +32,35 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Identity } from "../../operatorTypes";
 
-// Define the form data type
+// Define the form data type matching the database schema
 interface ContractorPortfolioFormData {
   title: string;
   location: string;
+  postal_code: string;
   project_type: string;
+  building_type: string;
   project_value: string;
   duration_days: string;
   completion_date: string;
   description: string;
+  scope_of_work: string;
   technologies_used: string[];
   main_image_url: string;
   additional_images: string[];
+  before_images: string[];
+  after_images: string[];
   results_achieved: string;
-  client_satisfaction: string;
-  challenges_solved: string;
   is_featured: boolean;
 }
 
 export const ContractorPortfolioItemCreate = () => {
   const navigate = useNavigate();
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [beforeImages, setBeforeImages] = useState<string[]>([]);
+  const [afterImages, setAfterImages] = useState<string[]>([]);
   const [mainImageUrl, setMainImageUrl] = useState("");
+  const [beforeImageUrl, setBeforeImageUrl] = useState("");
+  const [afterImageUrl, setAfterImageUrl] = useState("");
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -71,17 +78,20 @@ export const ContractorPortfolioItemCreate = () => {
     defaultValues: {
       title: "",
       location: "",
+      postal_code: "",
       project_type: "",
+      building_type: "",
       project_value: "",
       duration_days: "",
       completion_date: "",
       description: "",
+      scope_of_work: "",
       technologies_used: [],
       main_image_url: "",
       additional_images: [],
+      before_images: [],
+      after_images: [],
       results_achieved: "",
-      client_satisfaction: "",
-      challenges_solved: "",
       is_featured: false,
     },
   });
@@ -99,6 +109,16 @@ export const ContractorPortfolioItemCreate = () => {
     { value: "wentylacja", label: "Wentylacja mechaniczna" },
     { value: "kolektory_sloneczne", label: "Kolektory słoneczne" },
     { value: "biomasa", label: "Kocioł na biomasę" },
+    { value: "inny", label: "Inny" },
+  ];
+
+  const buildingTypes = [
+    { value: "dom_jednorodzinny", label: "Dom jednorodzinny" },
+    { value: "dom_szeregowy", label: "Dom szeregowy" },
+    { value: "apartament", label: "Apartament" },
+    { value: "budynek_wielorodzinny", label: "Budynek wielorodzinny" },
+    { value: "budynek_uslugowy", label: "Budynek usługowy" },
+    { value: "budynek_przemyslowy", label: "Budynek przemysłowy" },
     { value: "inny", label: "Inny" },
   ];
 
@@ -146,10 +166,40 @@ export const ContractorPortfolioItemCreate = () => {
     }
   };
 
+  const handleBeforeImageAdd = () => {
+    if (beforeImageUrl.trim() && !beforeImages.includes(beforeImageUrl.trim())) {
+      const newImages = [...beforeImages, beforeImageUrl.trim()];
+      setBeforeImages(newImages);
+      setValue("before_images", newImages);
+      setBeforeImageUrl("");
+    }
+  };
+
+  const handleAfterImageAdd = () => {
+    if (afterImageUrl.trim() && !afterImages.includes(afterImageUrl.trim())) {
+      const newImages = [...afterImages, afterImageUrl.trim()];
+      setAfterImages(newImages);
+      setValue("after_images", newImages);
+      setAfterImageUrl("");
+    }
+  };
+
   const handleImageRemove = (imageUrl: string) => {
     const newImages = selectedImages.filter(img => img !== imageUrl);
     setSelectedImages(newImages);
     setValue("additional_images", newImages);
+  };
+
+  const handleBeforeImageRemove = (imageUrl: string) => {
+    const newImages = beforeImages.filter(img => img !== imageUrl);
+    setBeforeImages(newImages);
+    setValue("before_images", newImages);
+  };
+
+  const handleAfterImageRemove = (imageUrl: string) => {
+    const newImages = afterImages.filter(img => img !== imageUrl);
+    setAfterImages(newImages);
+    setValue("after_images", newImages);
   };
 
   const handleFormSubmit: SubmitHandler<ContractorPortfolioFormData> = (data) => {
@@ -165,6 +215,8 @@ export const ContractorPortfolioItemCreate = () => {
       duration_days: data.duration_days ? parseInt(data.duration_days) : null,
       technologies_used: selectedTechnologies,
       additional_images: selectedImages,
+      before_images: beforeImages,
+      after_images: afterImages,
       is_featured: data.is_featured || false,
     };
 
@@ -268,26 +320,37 @@ export const ContractorPortfolioItemCreate = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="completion_date">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Data ukończenia *
-                        </div>
+                      <Label htmlFor="postal_code">
+                        Kod pocztowy
                       </Label>
                       <Input
-                        id="completion_date"
-                        type="date"
-                        max={new Date().toISOString().split('T')[0]}
-                        {...register("completion_date", {
-                          required: "Data ukończenia jest wymagana",
-                        })}
+                        id="postal_code"
+                        placeholder="00-001"
+                        {...register("postal_code")}
                       />
-                      {errors.completion_date && (
-                        <p className="text-sm text-red-500">
-                          {errors.completion_date.message as string}
-                        </p>
-                      )}
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="completion_date">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        Data ukończenia *
+                      </div>
+                    </Label>
+                    <Input
+                      id="completion_date"
+                      type="date"
+                      max={new Date().toISOString().split('T')[0]}
+                      {...register("completion_date", {
+                        required: "Data ukończenia jest wymagana",
+                      })}
+                    />
+                    {errors.completion_date && (
+                      <p className="text-sm text-red-500">
+                        {errors.completion_date.message as string}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -316,6 +379,24 @@ export const ContractorPortfolioItemCreate = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="building_type">Typ budynku</Label>
+                      <Select onValueChange={(value) => setValue("building_type", value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Wybierz typ budynku" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {buildingTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 mt-4">
+                    <div className="space-y-2">
                       <Label htmlFor="project_value">
                         <div className="flex items-center gap-2">
                           <Euro className="w-4 h-4" />
@@ -331,9 +412,7 @@ export const ContractorPortfolioItemCreate = () => {
                         {...register("project_value")}
                       />
                     </div>
-                  </div>
 
-                  <div className="mt-4">
                     <div className="space-y-2">
                       <Label htmlFor="duration_days">
                         <div className="flex items-center gap-2">
@@ -405,6 +484,18 @@ export const ContractorPortfolioItemCreate = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="scope_of_work">
+                        Zakres wykonanych prac
+                      </Label>
+                      <Textarea
+                        id="scope_of_work"
+                        placeholder="np. Izolacja ścian zewnętrznych, wymiana okien, instalacja pompy ciepła..."
+                        rows={3}
+                        {...register("scope_of_work")}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="results_achieved">
                         <div className="flex items-center gap-2">
                           <TrendingUp className="w-4 h-4" />
@@ -418,30 +509,6 @@ export const ContractorPortfolioItemCreate = () => {
                         {...register("results_achieved")}
                       />
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="challenges_solved">
-                        Rozwiązane wyzwania
-                      </Label>
-                      <Textarea
-                        id="challenges_solved"
-                        placeholder="Opisz napotkane wyzwania i sposoby ich rozwiązania..."
-                        rows={3}
-                        {...register("challenges_solved")}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="client_satisfaction">
-                        Opinia klienta
-                      </Label>
-                      <Textarea
-                        id="client_satisfaction"
-                        placeholder="Opinia klienta o realizacji projektu..."
-                        rows={3}
-                        {...register("client_satisfaction")}
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -449,7 +516,8 @@ export const ContractorPortfolioItemCreate = () => {
                 <div className="border-t pt-6">
                   <h3 className="text-lg font-medium mb-4">Zdjęcia projektu</h3>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-6">
+                    {/* Główne zdjęcie */}
                     <div className="space-y-2">
                       <Label htmlFor="main_image_url">
                         <div className="flex items-center gap-2">
@@ -464,11 +532,106 @@ export const ContractorPortfolioItemCreate = () => {
                       />
                     </div>
 
+                    {/* Zdjęcia przed realizacją */}
                     <div className="space-y-2">
-                      <Label>Dodatkowe zdjęcia (przed/po, etapy prac)</Label>
+                      <Label>Zdjęcia przed realizacją</Label>
                       <div className="flex gap-2">
                         <Input
-                          placeholder="URL zdjęcia"
+                          placeholder="URL zdjęcia przed"
+                          value={beforeImageUrl}
+                          onChange={(e) => setBeforeImageUrl(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleBeforeImageAdd();
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleBeforeImageAdd}
+                          disabled={!beforeImageUrl.trim()}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      {beforeImages.length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-sm">Zdjęcia przed:</Label>
+                          <div className="space-y-1">
+                            {beforeImages.map((imageUrl, index) => (
+                              <div key={index} className="flex items-center gap-2 p-2 bg-red-50 rounded">
+                                <span className="text-sm truncate flex-1">{imageUrl}</span>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleBeforeImageRemove(imageUrl)}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Zdjęcia po realizacji */}
+                    <div className="space-y-2">
+                      <Label>Zdjęcia po realizacji</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="URL zdjęcia po"
+                          value={afterImageUrl}
+                          onChange={(e) => setAfterImageUrl(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAfterImageAdd();
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleAfterImageAdd}
+                          disabled={!afterImageUrl.trim()}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      {afterImages.length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-sm">Zdjęcia po:</Label>
+                          <div className="space-y-1">
+                            {afterImages.map((imageUrl, index) => (
+                              <div key={index} className="flex items-center gap-2 p-2 bg-green-50 rounded">
+                                <span className="text-sm truncate flex-1">{imageUrl}</span>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleAfterImageRemove(imageUrl)}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dodatkowe zdjęcia */}
+                    <div className="space-y-2">
+                      <Label>Dodatkowe zdjęcia (etapy prac, detale)</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="URL dodatkowego zdjęcia"
                           value={mainImageUrl}
                           onChange={(e) => setMainImageUrl(e.target.value)}
                           onKeyPress={(e) => {
@@ -490,7 +653,7 @@ export const ContractorPortfolioItemCreate = () => {
                       
                       {selectedImages.length > 0 && (
                         <div className="space-y-2">
-                          <Label className="text-sm">Dodane zdjęcia:</Label>
+                          <Label className="text-sm">Dodatkowe zdjęcia:</Label>
                           <div className="space-y-1">
                             {selectedImages.map((imageUrl, index) => (
                               <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
@@ -565,13 +728,18 @@ export const ContractorPortfolioItemCreate = () => {
                 </div>
 
                 <div>
+                  <div className="font-medium text-foreground mb-1">🏢 Typ budynku</div>
+                  <div>Określ rodzaj budynku, na którym wykonywałeś prace</div>
+                </div>
+
+                <div>
                   <div className="font-medium text-foreground mb-1">⚙️ Technologie</div>
                   <div>Wybierz wszystkie zastosowane materiały i technologie</div>
                 </div>
 
                 <div>
-                  <div className="font-medium text-foreground mb-1">📝 Opis projektu</div>
-                  <div>Opisz etapy realizacji, wyzwania i rozwiązania</div>
+                  <div className="font-medium text-foreground mb-1">📝 Zakres prac</div>
+                  <div>Opisz konkretne prace wykonane w projekcie</div>
                 </div>
 
                 <div>
@@ -581,7 +749,7 @@ export const ContractorPortfolioItemCreate = () => {
 
                 <div>
                   <div className="font-medium text-foreground mb-1">📸 Zdjęcia</div>
-                  <div>Dodaj zdjęcia przed i po realizacji, etapów prac</div>
+                  <div>Dodaj zdjęcia przed i po realizacji, oraz etapów prac</div>
                 </div>
 
                 <div>
