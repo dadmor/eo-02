@@ -9,10 +9,12 @@ import { Button, Input, Label } from "@/components/ui";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Identity } from "../../operatorTypes";
+import { useNavigate } from "react-router";
 
 export const ContactOperator = () => {
   const { list } = useNavigation();
   const { mutate: createContact } = useCreate();
+  const navigate = useNavigate();
 
   const { data: identity, isLoading: identityLoading } = useGetIdentity<Identity>();
   const userId = identity?.id;
@@ -178,23 +180,14 @@ export const ContactOperator = () => {
     <div className="container mx-auto p-6">
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              console.log("Navigating back to dashboard");
-              try {
-                list("beneficiary/dashboard");
-              } catch (error) {
-                console.error("Navigation error:", error);
-                // Fallback navigation
-                window.history.back();
-              }
-            }}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Powrót
-          </Button>
+        <Button
+  variant="outline"
+  size="sm"
+  onClick={() => navigate("/beneficiary")}
+>
+  <ArrowLeft className="w-4 h-4 mr-2" />
+  Powrót
+</Button>
         </div>
         <h1 className="text-3xl font-bold tracking-tight">
           Kontakt z Operatorem
@@ -369,7 +362,7 @@ export const ContactOperator = () => {
                   {...register("phone_number", {
                     required: "Numer telefonu jest wymagany",
                     pattern: {
-                      value: /^[\+]?[\d\s\-\(\)]{9,15}$/,
+                      value: /^[+]?[\d\s()-]{9,15}$/,
                       message: "Nieprawidłowy format numeru telefonu"
                     }
                   })}

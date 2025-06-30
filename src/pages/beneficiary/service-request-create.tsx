@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Home, MapPin, Phone, Wrench, Thermometer, Square, FileText, Upload } from "lucide-react";
 import { Button, Input, Label } from "@/components/ui";
 import { Identity } from "../../operatorTypes";
+import { useNavigate } from "react-router";
 
 export const ServiceRequestCreate = () => {
   const { list } = useNavigation();
+  const navigate = useNavigate(); 
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -67,14 +69,14 @@ export const ServiceRequestCreate = () => {
     <>
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => list("service_requests")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Powrót
-          </Button>
+        <Button
+  variant="outline"
+  size="sm"
+  onClick={() => navigate("/beneficiary")}
+>
+  <ArrowLeft className="w-4 h-4 mr-2" />
+  Powrót
+</Button>
         </div>
         <h1 className="text-3xl font-bold tracking-tight">
           Nowe Zlecenie Wykonawcy

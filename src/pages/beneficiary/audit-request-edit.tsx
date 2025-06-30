@@ -2,7 +2,7 @@
 import { useForm } from "@refinedev/react-hook-form";
 import { useNavigation, useUpdate, useOne } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,7 @@ import { useEffect } from "react";
 export const AuditRequestEdit = () => {
   const { id } = useParams<{ id: string }>();
   const { list } = useNavigation();
+  const navigate = useNavigate(); 
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -113,14 +114,14 @@ export const AuditRequestEdit = () => {
             Błąd podczas ładowania zlecenia. Sprawdź czy zlecenie istnieje i masz do niego dostęp.
           </AlertDescription>
         </Alert>
-        <Button 
-          variant="outline" 
-          className="mt-4"
-          onClick={() => list("audit_requests")}
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Powrót do listy
-        </Button>
+        <Button
+  variant="outline"
+  size="sm"
+  onClick={() => navigate("/beneficiary")}
+>
+  <ArrowLeft className="w-4 h-4 mr-2" />
+  Powrót
+</Button>
       </div>
     );
   }
@@ -151,14 +152,14 @@ export const AuditRequestEdit = () => {
     <>
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => list("audit_requests")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Powrót
-          </Button>
+        <Button
+  variant="outline"
+  size="sm"
+  onClick={() => navigate("/beneficiary")}
+>
+  <ArrowLeft className="w-4 h-4 mr-2" />
+  Powrót
+</Button>
         </div>
         <h1 className="text-3xl font-bold tracking-tight">
           Edytuj Zlecenie Audytora

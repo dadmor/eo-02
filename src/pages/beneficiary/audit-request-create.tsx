@@ -8,9 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Home, MapPin, Phone, ClipboardCheck, Building, Calendar, Square } from "lucide-react";
 import { Button, Input, Label } from "@/components/ui";
 import { Identity } from "../../operatorTypes";
+import { useNavigate } from "react-router";
 
 export const AuditRequestCreate = () => {
   const { list } = useNavigation();
+  const navigate = useNavigate(); 
   
   // Get authenticated user
   const { data: identity } = useGetIdentity<Identity>();
@@ -68,14 +70,14 @@ export const AuditRequestCreate = () => {
     <>
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => list("audit_requests")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Powrót
-          </Button>
+        <Button
+  variant="outline"
+  size="sm"
+  onClick={() => navigate("/beneficiary")}
+>
+  <ArrowLeft className="w-4 h-4 mr-2" />
+  Powrót
+</Button>
         </div>
         <h1 className="text-3xl font-bold tracking-tight">
           Nowe Zlecenie Audytora
