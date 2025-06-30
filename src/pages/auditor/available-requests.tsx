@@ -100,20 +100,24 @@ export const AvailableRequests = () => {
 
   // Stwórz mapę ofert dla szybkiego wyszukiwania
   const offersByRequestId = offers.reduce((acc: Record<string, any>, offer: any) => {
-    acc[offer.request_id] = offer;
+    if (offer.request_id) {
+      acc[offer.request_id] = offer;
+    }
     return acc;
   }, {});
 
   // Filtrowanie
   const filteredRequests = allRequests.filter(request => {
+    if (!request.id) return false; // Skip if no ID
+    
     const matchesSearch = !searchTerm || 
-      request.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.street_address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.postal_code.includes(searchTerm);
+      request.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.street_address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.postal_code?.includes(searchTerm);
     
     const matchesCity = cityFilter === "all" || request.city === cityFilter;
     
-    const hasOffer = offersByRequestId[request.id];
+    const hasOffer = request.id ? offersByRequestId[request.id] : false;
     const matchesStatus = statusFilter === "all" || 
       (statusFilter === "no_offer" && !hasOffer) ||
       (statusFilter === "has_offer" && hasOffer);
@@ -122,17 +126,18 @@ export const AvailableRequests = () => {
   });
 
   // Unikalne miasta do filtra
-  const uniqueCities = [...new Set(allRequests.map(r => r.city))].sort();
+  const uniqueCities = [...new Set(allRequests.map(r => r.city).filter(Boolean))].sort();
 
   // Statystyki
   const stats = {
     total: allRequests.length,
-    withOffers: allRequests.filter(r => offersByRequestId[r.id]).length,
-    withoutOffers: allRequests.filter(r => !offersByRequestId[r.id]).length,
+    withOffers: allRequests.filter(r => r.id && offersByRequestId[r.id]).length,
+    withoutOffers: allRequests.filter(r => r.id && !offersByRequestId[r.id]).length,
   };
 
   // Funkcja do renderowania statusu oferty
-  const getOfferStatus = (requestId: string) => {
+  const getOfferStatus = (requestId: string | undefined) => {
+    if (!requestId) return null;
     const offer = offersByRequestId[requestId];
     if (!offer) return null;
 
