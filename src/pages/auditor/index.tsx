@@ -12,6 +12,7 @@ import { AvailableRequests } from "./available-requests";
 import { MyOffers } from "./my-offers";
 import { CompletedAudits } from "./completed-audits";
 import { PortfolioItemCreate } from "./portfolio-item-create";
+import { RequestDetails } from "./request-details";
 
 // Export wszystkich komponentów
 export { AuditorDashboard } from "./dashboard";
@@ -20,6 +21,7 @@ export { AuditorPortfolio } from "./portfolio";
 export { AvailableRequests } from "./available-requests";
 export { MyOffers } from "./my-offers";
 export { CompletedAudits } from "./completed-audits";
+export { RequestDetails } from "./request-details";
 
 // Komponenty do implementacji
 export const OfferCreate = () => {
@@ -28,10 +30,6 @@ export const OfferCreate = () => {
 
 export const OfferEdit = () => {
   return <div>Offer Edit - do implementacji</div>;
-};
-
-export const RequestDetails = () => {
-  return <div>Request Details - do implementacji</div>;
 };
 
 export const PortfolioItemEdit = () => {

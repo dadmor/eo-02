@@ -12,6 +12,7 @@ import { ContractorProfile } from "./profile";
 import { ContractorPortfolio } from "./portfolio";
 import { ContractorAvailableRequests } from "./available-requests";
 import { ContractorMyOffers } from "./my-offers";
+import { ContractorPortfolioItemCreate } from "./portfolio-item-create";
 
 // Export wszystkich komponentów
 export { ContractorDashboard } from "./dashboard";
@@ -57,15 +58,6 @@ export const ContractorRequestDetails = () => {
   );
 };
 
-export const ContractorPortfolioItemCreate = () => {
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Dodaj Projekt do Portfolio</h1>
-      <p>Komponente do implementacji - formularz dodawania projektu</p>
-    </div>
-  );
-};
-
 export const ContractorPortfolioItemEdit = () => {
   return (
     <div className="p-6">
@@ -94,7 +86,7 @@ export const contractorResources = [
     name: "dashboard_contractor",
     list: "/contractor",
     meta: {
-      label: "Dashboard (c)",
+      label: "Dashboard",
       icon: <BarChart3 className="h-4 w-4" />,
       roles: ["contractor"],
     },
