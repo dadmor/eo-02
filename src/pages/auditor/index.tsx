@@ -15,6 +15,8 @@ import { PortfolioItemCreate } from "./portfolio-item-create";
 import { RequestDetails } from "./request-details";
 import { OfferCreate } from "./offer-create";
 import { OfferShow } from "./offer-show";
+import { OfferEdit } from "./offer-edit";
+import { PortfolioItemEdit } from "./portfolio-item-edit";
 
 // Export wszystkich komponentów
 export { AuditorDashboard } from "./dashboard";
@@ -26,14 +28,10 @@ export { CompletedAudits } from "./completed-audits";
 export { RequestDetails } from "./request-details";
 export { OfferCreate } from "./offer-create";
 export { OfferShow } from "./offer-show";
+export { OfferEdit } from "./offer-edit";
+export { PortfolioItemEdit } from "./portfolio-item-edit";
 
-export const OfferEdit = () => {
-  return <div>Offer Edit - do implementacji</div>;
-};
 
-export const PortfolioItemEdit = () => {
-  return <div>Portfolio Item Edit - do implementacji</div>;
-};
 
 // Helper function do tworzenia chronionej trasy
 const createProtectedRoute = (key: string, path: string, element: React.ReactElement) => (
