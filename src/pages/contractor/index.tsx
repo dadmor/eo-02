@@ -3,6 +3,8 @@
 // ========================================
 import React from "react";
 import { Route } from "react-router-dom";
+import { RoleGuard } from "@/components/RoleGuard";
+import { BarChart3, Hammer, DollarSign, User, Folder } from "lucide-react";
 
 // Import komponentów
 import { ContractorDashboard } from "./dashboard";
@@ -73,6 +75,19 @@ export const ContractorPortfolioItemEdit = () => {
   );
 };
 
+// Helper function do tworzenia chronionej trasy
+const createProtectedRoute = (key: string, path: string, element: React.ReactElement) => (
+  <Route
+    key={key}
+    path={path}
+    element={
+      <RoleGuard allowedRoles={["contractor"]}>
+        {element}
+      </RoleGuard>
+    }
+  />
+);
+
 // Resource definitions dla Refine
 export const contractorResources = [
   {
@@ -80,7 +95,8 @@ export const contractorResources = [
     list: "/contractor",
     meta: {
       label: "Dashboard (c)",
-      icon: "📊",
+      icon: <BarChart3 className="h-4 w-4" />,
+      roles: ["contractor"],
     },
   },
   {
@@ -89,7 +105,8 @@ export const contractorResources = [
     show: "/contractor/request/:id",
     meta: {
       label: "Dostępne zlecenia",
-      icon: "🔨",
+      icon: <Hammer className="h-4 w-4" />,
+      roles: ["contractor"],
     },
   },
   {
@@ -100,7 +117,8 @@ export const contractorResources = [
     show: "/contractor/offer/:id",
     meta: {
       label: "Moje oferty",
-      icon: "💰",
+      icon: <DollarSign className="h-4 w-4" />,
+      roles: ["contractor"],
     },
   },
   {
@@ -109,7 +127,8 @@ export const contractorResources = [
     edit: "/contractor/profile/edit",
     meta: {
       label: "Profil",
-      icon: "👤",
+      icon: <User className="h-4 w-4" />,
+      roles: ["contractor"],
     },
   },
   {
@@ -120,66 +139,23 @@ export const contractorResources = [
     show: "/contractor/portfolio/:id",
     meta: {
       label: "Portfolio",
-      icon: "📁",
+      icon: <Folder className="h-4 w-4" />,
+      roles: ["contractor"],
     },
   },
 ];
 
-// Routes dla wykonawców
+// Routes dla wykonawców z RoleGuard
 export const contractorRoutes = [
-  <Route
-    key="contractor-dashboard"
-    path="/contractor"
-    element={<ContractorDashboard />}
-  />,
-  <Route
-    key="contractor-available-requests"
-    path="/contractor/available-requests"
-    element={<ContractorAvailableRequests />}
-  />,
-  <Route
-    key="contractor-my-offers"
-    path="/contractor/my-offers"
-    element={<ContractorMyOffers />}
-  />,
-  <Route
-    key="contractor-profile"
-    path="/contractor/profile"
-    element={<ContractorProfile />}
-  />,
-  <Route
-    key="contractor-portfolio"
-    path="/contractor/portfolio"
-    element={<ContractorPortfolio />}
-  />,
-  <Route
-    key="contractor-completed-projects"
-    path="/contractor/completed-projects"
-    element={<ContractorCompletedProjects />}
-  />,
-  <Route
-    key="contractor-request-details"
-    path="/contractor/request/:id"
-    element={<ContractorRequestDetails />}
-  />,
-  <Route
-    key="contractor-offer-create"
-    path="/contractor/offer/create/:requestId"
-    element={<ContractorOfferCreate />}
-  />,
-  <Route
-    key="contractor-offer-edit"
-    path="/contractor/offer/edit/:id"
-    element={<ContractorOfferEdit />}
-  />,
-  <Route
-    key="contractor-portfolio-item-create"
-    path="/contractor/portfolio/create"
-    element={<ContractorPortfolioItemCreate />}
-  />,
-  <Route
-    key="contractor-portfolio-item-edit"
-    path="/contractor/portfolio/edit/:id"
-    element={<ContractorPortfolioItemEdit />}
-  />,
+  createProtectedRoute("contractor-dashboard", "/contractor", <ContractorDashboard />),
+  createProtectedRoute("contractor-available-requests", "/contractor/available-requests", <ContractorAvailableRequests />),
+  createProtectedRoute("contractor-my-offers", "/contractor/my-offers", <ContractorMyOffers />),
+  createProtectedRoute("contractor-profile", "/contractor/profile", <ContractorProfile />),
+  createProtectedRoute("contractor-portfolio", "/contractor/portfolio", <ContractorPortfolio />),
+  createProtectedRoute("contractor-completed-projects", "/contractor/completed-projects", <ContractorCompletedProjects />),
+  createProtectedRoute("contractor-request-details", "/contractor/request/:id", <ContractorRequestDetails />),
+  createProtectedRoute("contractor-offer-create", "/contractor/offer/create/:requestId", <ContractorOfferCreate />),
+  createProtectedRoute("contractor-offer-edit", "/contractor/offer/edit/:id", <ContractorOfferEdit />),
+  createProtectedRoute("contractor-portfolio-item-create", "/contractor/portfolio/create", <ContractorPortfolioItemCreate />),
+  createProtectedRoute("contractor-portfolio-item-edit", "/contractor/portfolio/edit/:id", <ContractorPortfolioItemEdit />),
 ];

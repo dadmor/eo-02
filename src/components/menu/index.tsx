@@ -1,11 +1,12 @@
-// src/components/Menu.tsx
+// src/components/Menu.tsx - tylko ta jedna zmiana!
 import React from "react";
-import { useLogout, useMenu } from "@refinedev/core";
+import { useLogout, useMenu, useGetIdentity } from "@refinedev/core";
 import { NavLink } from "react-router";
 import { LogOut, Menu as MenuIcon, X } from "lucide-react";
 import { UserMicroProfile } from "../layout/UserMicroProfile";
 import { cn } from "@/utility";
 import { Button, ScrollArea, Separator } from "../ui";
+import { UserData } from "@/operatorTypes";
 
 interface MenuProps {
   onClose?: () => void;
@@ -14,13 +15,26 @@ interface MenuProps {
 export const Menu: React.FC<MenuProps> = ({ onClose }) => {
   const { mutate: logout } = useLogout();
   const { menuItems } = useMenu();
+  const { data: user } = useGetIdentity<UserData>();
 
   const handleNavClick = () => {
-    // Zamknij menu na mobile po kliknięciu w link
     if (onClose) {
       onClose();
     }
   };
+
+  // Pobierz rolę użytkownika
+  const userRole = user?.user_metadata?.role;
+
+  // JEDYNA ZMIANA: Filtruj menu według roli
+  const filteredMenuItems = menuItems.filter((item) => {
+    // Jeśli item nie ma zdefiniowanych ról, pokaż wszystkim
+    if (!item.meta?.roles) {
+      return true;
+    }
+    // Jeśli ma role, sprawdź czy użytkownik ma odpowiednią rolę
+    return item.meta.roles.includes(userRole);
+  });
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-background">
@@ -30,7 +44,6 @@ export const Menu: React.FC<MenuProps> = ({ onClose }) => {
           <MenuIcon className="h-6 w-6 mr-2" />
           <span className="font-semibold">Logo.com</span>
         </div>
-        {/* Close button - widoczny tylko na mobile */}
         {onClose && (
           <Button
             variant="ghost"
@@ -46,7 +59,7 @@ export const Menu: React.FC<MenuProps> = ({ onClose }) => {
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-2">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <NavLink
               key={item.key}
               to={item.route ?? "/"}

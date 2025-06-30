@@ -2,7 +2,7 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import { RoleGuard } from "@/components/RoleGuard";
-import { BarChart3, Wrench, ClipboardList, Phone } from "lucide-react";
+import { BarChart3, Wrench, ClipboardList, Phone, Plus } from "lucide-react";
 
 // Import komponentów
 import { AuditRequestCreate } from "./audit-request-create";
@@ -45,6 +45,7 @@ export const beneficiaryResources = [
     meta: {
       label: "Dashboard",
       icon: <BarChart3 className="h-4 w-4" />,
+      roles: ["beneficiary"], // DODANE
     },
   },
   {
@@ -53,6 +54,7 @@ export const beneficiaryResources = [
     meta: {
       label: "Moje zapytania",
       icon: <ClipboardList className="h-4 w-4" />,
+      roles: ["beneficiary"], // DODANE
     },
   },
   {
@@ -63,6 +65,7 @@ export const beneficiaryResources = [
     meta: {
       label: "Zapytanie o audyt",
       icon: <BarChart3 className="h-4 w-4" />,
+      roles: ["beneficiary"], // DODANE
       canDelete: false,
     },
   },
@@ -74,6 +77,7 @@ export const beneficiaryResources = [
     meta: {
       label: "Zapytanie o usługę",
       icon: <Wrench className="h-4 w-4" />,
+      roles: ["beneficiary"], // DODANE
       canDelete: false,
     },
   },
@@ -83,6 +87,7 @@ export const beneficiaryResources = [
     meta: {
       label: "Kontakt z operatorem",
       icon: <Phone className="h-4 w-4" />,
+      roles: ["beneficiary"], // DODANE
     },
   },
 ];

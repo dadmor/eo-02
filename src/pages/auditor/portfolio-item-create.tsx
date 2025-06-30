@@ -21,7 +21,6 @@ import {
   Square,
   Image,
   Award,
-  Upload,
   X,
   Plus
 } from "lucide-react";

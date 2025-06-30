@@ -2,6 +2,7 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import { RoleGuard } from "@/components/RoleGuard";
+import { BarChart3, ClipboardList, DollarSign, User, Folder } from "lucide-react";
 
 // Import komponentów
 import { AuditorDashboard } from "./dashboard";
@@ -33,8 +34,6 @@ export const RequestDetails = () => {
   return <div>Request Details - do implementacji</div>;
 };
 
-
-
 export const PortfolioItemEdit = () => {
   return <div>Portfolio Item Edit - do implementacji</div>;
 };
@@ -58,8 +57,9 @@ export const auditorResources = [
     name: "dashboard_auditor",
     list: "/auditor",
     meta: {
-      label: "Dashboard (a)",
-      icon: "📊",
+      label: "Dashboard",
+      icon: <BarChart3 className="h-4 w-4" />,
+      roles: ["auditor"],
     },
   },
   {
@@ -68,7 +68,8 @@ export const auditorResources = [
     show: "/auditor/request/:id",
     meta: {
       label: "Dostępne zlecenia",
-      icon: "📋",
+      icon: <ClipboardList className="h-4 w-4" />,
+      roles: ["auditor"],
     },
   },
   {
@@ -79,7 +80,8 @@ export const auditorResources = [
     show: "/auditor/offer/:id",
     meta: {
       label: "Moje oferty",
-      icon: "💰",
+      icon: <DollarSign className="h-4 w-4" />,
+      roles: ["auditor"],
     },
   },
   {
@@ -88,7 +90,8 @@ export const auditorResources = [
     edit: "/auditor/profile/edit",
     meta: {
       label: "Profil",
-      icon: "👤",
+      icon: <User className="h-4 w-4" />,
+      roles: ["auditor"],
     },
   },
   {
@@ -99,7 +102,8 @@ export const auditorResources = [
     show: "/auditor/portfolio/:id",
     meta: {
       label: "Portfolio",
-      icon: "📁",
+      icon: <Folder className="h-4 w-4" />,
+      roles: ["auditor"],
     },
   },
 ];
