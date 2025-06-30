@@ -13,6 +13,8 @@ import { MyOffers } from "./my-offers";
 import { CompletedAudits } from "./completed-audits";
 import { PortfolioItemCreate } from "./portfolio-item-create";
 import { RequestDetails } from "./request-details";
+import { OfferCreate } from "./offer-create";
+import { OfferShow } from "./offer-show";
 
 // Export wszystkich komponentów
 export { AuditorDashboard } from "./dashboard";
@@ -22,11 +24,8 @@ export { AvailableRequests } from "./available-requests";
 export { MyOffers } from "./my-offers";
 export { CompletedAudits } from "./completed-audits";
 export { RequestDetails } from "./request-details";
-
-// Komponenty do implementacji
-export const OfferCreate = () => {
-  return <div>Offer Create - do implementacji</div>;
-};
+export { OfferCreate } from "./offer-create";
+export { OfferShow } from "./offer-show";
 
 export const OfferEdit = () => {
   return <div>Offer Edit - do implementacji</div>;
@@ -116,6 +115,7 @@ export const auditorRoutes = [
   createProtectedRoute("auditor-completed-audits", "/auditor/completed-audits", <CompletedAudits />),
   createProtectedRoute("auditor-request-details", "/auditor/request/:id", <RequestDetails />),
   createProtectedRoute("auditor-offer-create", "/auditor/offer/create/:requestId", <OfferCreate />),
+  createProtectedRoute("auditor-offer-show", "/auditor/offer/:id", <OfferShow />),
   createProtectedRoute("auditor-offer-edit", "/auditor/offer/edit/:id", <OfferEdit />),
   createProtectedRoute("portfolio-item-create", "/auditor/portfolio/create", <PortfolioItemCreate />),
   createProtectedRoute("portfolio-item-edit", "/auditor/portfolio/edit/:id", <PortfolioItemEdit />),

@@ -47,7 +47,7 @@ export const RequestDetails = () => {
 
   // Check if user has portfolio
   const { data: portfolio } = useList({
-    resource: "auditor_portfolios",
+    resource: "auditor_portfolio_items",
     filters: userId ? [
       {
         field: "auditor_id",
@@ -71,7 +71,7 @@ export const RequestDetails = () => {
         value: userId,
       },
       {
-        field: "audit_request_id",
+        field: "request_id",
         operator: "eq",
         value: id,
       },
