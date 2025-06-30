@@ -101,6 +101,14 @@ export const AuditorDashboard = () => {
   const profileData = profile?.data?.[0];
   const portfolio = portfolioItems?.data || [];
 
+  // Mapowanie ofert po request_id
+  const offersByRequestId = offers.reduce((acc: Record<string, any>, offer: any) => {
+    if (offer.request_id) {
+      acc[offer.request_id] = offer;
+    }
+    return acc;
+  }, {});
+
   const stats = {
     available: available.length,
     pending: offers.filter(o => o.status === 'pending').length,
@@ -116,7 +124,6 @@ export const AuditorDashboard = () => {
   const hasProfile = !!profileData;
   const hasPortfolio = portfolio.length > 0;
 
-  // Show loading state if user identity is not loaded yet
   if (!userId) {
     return (
       <div className="p-6 mx-auto">
@@ -135,7 +142,6 @@ export const AuditorDashboard = () => {
         description="Zarządzaj swoim profilem, ofertami i portfolio projektów"
       />
 
-      {/* Alert dla nowych audytorów */}
       {!hasProfile && (
         <Card className="border-blue-200 bg-blue-50">
           <CardContent className="p-6">
@@ -161,7 +167,6 @@ export const AuditorDashboard = () => {
         </Card>
       )}
 
-      {/* Alert o portfolio */}
       {hasProfile && !hasPortfolio && (
         <Card className="border-green-200 bg-green-50">
           <CardContent className="p-6">
@@ -187,7 +192,6 @@ export const AuditorDashboard = () => {
         </Card>
       )}
 
-      {/* Statystyki */}
       <GridBox variant="1-2-4">
         <Card>
           <CardContent className="p-6">
@@ -200,7 +204,6 @@ export const AuditorDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -212,7 +215,6 @@ export const AuditorDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -224,7 +226,6 @@ export const AuditorDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -236,171 +237,8 @@ export const AuditorDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
-        
       </GridBox>
 
-      <GridBox>
-        {/* Szybkie akcje */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Szybkie akcje</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button 
-                className="w-full" 
-                onClick={() => navigate('/auditor/available-requests')}
-                disabled={!hasProfile}
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Przeglądaj zlecenia
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/auditor/my-offers')}
-              >
-                <Euro className="w-4 h-4 mr-2" />
-                Moje oferty
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/auditor/profile')}
-              >
-                <User className="w-4 h-4 mr-2" />
-                Profil firmy
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/auditor/portfolio')}
-              >
-                <Image className="w-4 h-4 mr-2" />
-                Portfolio projektów
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate('/auditor/completed-audits')}
-              >
-                <Star className="w-4 h-4 mr-2" />
-                Ukończone audyty
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Status profilu */}
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <User className="w-5 h-5" />
-                Status profilu
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Profil zawodowy</span>
-                  {hasProfile ? (
-                    <Badge className="bg-green-100 text-green-800">✓ Gotowy</Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-orange-500 text-orange-700">Brak</Badge>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Portfolio projektów</span>
-                  {hasPortfolio ? (
-                    <Badge className="bg-green-100 text-green-800">✓ {portfolio.length} proj.</Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-orange-500 text-orange-700">Puste</Badge>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Możliwość ofert</span>
-                  {hasProfile ? (
-                    <Badge className="bg-green-100 text-green-800">✓ Aktywne</Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-red-500 text-red-700">Nieaktywne</Badge>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Ostatnie oferty */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <FlexBox>
-                <CardTitle>Ostatnie oferty</CardTitle>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate('/auditor/my-offers')}
-                >
-                  Zobacz wszystkie
-                </Button>
-              </FlexBox>
-            </CardHeader>
-            <CardContent>
-              {recentOffers.length > 0 ? (
-                <div className="space-y-4">
-                  {recentOffers.map((offer: any) => (
-                    <div key={offer.id} className="border rounded-lg p-4">
-                      <FlexBox className="mb-2">
-                        <div>
-                          <Badge 
-                            variant="outline" 
-                            className={
-                              offer.status === 'pending' ? 'border-yellow-500 text-yellow-700' :
-                              offer.status === 'accepted' ? 'border-green-500 text-green-700' :
-                              offer.status === 'completed' ? 'border-blue-500 text-blue-700' :
-                              'border-red-500 text-red-700'
-                            }
-                          >
-                            {offer.status === 'pending' ? 'Oczekująca' :
-                             offer.status === 'accepted' ? 'Zaakceptowana' : 
-                             offer.status === 'completed' ? 'Ukończona' : 'Odrzucona'}
-                          </Badge>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/auditor/offer/${offer.id}`)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </FlexBox>
-                      <div className="text-sm">
-                        <div className="font-medium text-lg">{offer.price?.toLocaleString()} zł</div>
-                        <div className="text-muted-foreground">
-                          {offer.duration_days} dni • {new Date(offer.created_at).toLocaleDateString()}
-                        </div>
-                        {offer.description && (
-                          <div className="text-sm mt-1 text-gray-600 line-clamp-2">
-                            {offer.description}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Euro className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nie masz jeszcze żadnych ofert</p>
-                  <p className="text-sm">Złóż pierwszą ofertę na dostępne zlecenie</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </GridBox>
-
-      {/* Dostępne zlecenia preview */}
       <Card>
         <CardHeader>
           <FlexBox>
@@ -418,31 +256,51 @@ export const AuditorDashboard = () => {
           </FlexBox>
         </CardHeader>
         <CardContent>
-          {available.slice(0, 5).length > 0 ? (
+          {available.slice(0,5).length > 0 ? (
             <div className="space-y-3">
-              {available.slice(0, 5).map((request: any) => (
-                <div key={request.id} className="border rounded-lg p-3">
-                  <FlexBox>
-                    <div>
-                      <div className="font-medium">{request.city}, {request.street_address}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(request.created_at).toLocaleDateString()}
-                        </span>
-                        <span>{request.postal_code}</span>
+              {available.slice(0,5).map((request: any) => {
+                const offer = offersByRequestId[request.id];
+                return (
+                  <div key={request.id} className="border rounded-lg p-3">
+                    <FlexBox>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <div className="font-medium">{request.city}, {request.street_address}</div>
+                          {offer && (
+                            <Badge
+                              variant="outline"
+                              className={
+                                offer.status === 'pending' ? 'border-yellow-500 text-yellow-700' :
+                                offer.status === 'accepted' ? 'border-green-500 text-green-700' :
+                                offer.status === 'completed' ? 'border-blue-500 text-blue-700' :
+                                'border-red-500 text-red-700'
+                              }
+                            >
+                              {offer.status === 'pending' ? 'Oczekująca' :
+                               offer.status === 'accepted' ? 'Zaakceptowana' :
+                               offer.status === 'completed' ? 'Ukończona' : 'Odrzucona'}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(request.created_at).toLocaleDateString()}
+                          </span>
+                          <span>{request.postal_code}</span>
+                        </div>
                       </div>
-                    </div>
-                    <Button 
-                      size="sm"
-                      onClick={() => navigate(`/auditor/request/${request.id}`)}
-                      disabled={!hasProfile}
-                    >
-                      Sprawdź
-                    </Button>
-                  </FlexBox>
-                </div>
-              ))}
+                      <Button 
+                        size="sm"
+                        onClick={() => navigate(`/auditor/request/${request.id}`)}
+                        disabled={!hasProfile}
+                      >
+                        Sprawdź
+                      </Button>
+                    </FlexBox>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-6 text-muted-foreground">

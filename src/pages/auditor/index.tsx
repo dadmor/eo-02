@@ -7,21 +7,21 @@ import { BarChart3, ClipboardList, DollarSign, User, Folder } from "lucide-react
 // Import komponentów
 import { AuditorDashboard } from "./dashboard";
 import { AuditorProfile } from "./profile";
-import { AuditorPortfolio } from "./portfolio";
+import { AuditorPortfolio } from "./portfolio/portfolio";
 import { AvailableRequests } from "./available-requests";
 import { MyOffers } from "./my-offers";
 import { CompletedAudits } from "./completed-audits";
-import { PortfolioItemCreate } from "./portfolio-item-create";
+import { PortfolioItemCreate } from "./portfolio/portfolio-item-create";
 import { RequestDetails } from "./request-details";
 import { OfferCreate } from "./offer-create";
 import { OfferShow } from "./offer-show";
 import { OfferEdit } from "./offer-edit";
-import { PortfolioItemEdit } from "./portfolio-item-edit";
+import { PortfolioItemEdit } from "./portfolio/portfolio-item-edit";
 
 // Export wszystkich komponentów
 export { AuditorDashboard } from "./dashboard";
 export { AuditorProfile } from "./profile";
-export { AuditorPortfolio } from "./portfolio";
+export { AuditorPortfolio } from "./portfolio/portfolio";
 export { AvailableRequests } from "./available-requests";
 export { MyOffers } from "./my-offers";
 export { CompletedAudits } from "./completed-audits";
@@ -29,7 +29,7 @@ export { RequestDetails } from "./request-details";
 export { OfferCreate } from "./offer-create";
 export { OfferShow } from "./offer-show";
 export { OfferEdit } from "./offer-edit";
-export { PortfolioItemEdit } from "./portfolio-item-edit";
+export { PortfolioItemEdit } from "./portfolio/portfolio-item-edit";
 
 
 

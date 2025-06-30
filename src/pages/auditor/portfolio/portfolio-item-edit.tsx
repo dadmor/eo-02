@@ -1,10 +1,11 @@
 // ========================================
-// src/pages/auditor/portfolio-item-create.tsx
+// src/pages/auditor/portfolio-item-edit.tsx
 // ========================================
 
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useCreate } from "@refinedev/core";
+import { useOne, useUpdate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button, Input, Label } from "@/components/ui";
@@ -22,11 +23,11 @@ import {
   Image,
   Award,
   X,
-  Plus
+  Plus,
+  AlertCircle
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Identity } from "../../operatorTypes";
+import { useState, useEffect } from "react";
+import { Identity } from "../../../operatorTypes";
 
 // Define the form data type
 interface PortfolioFormData {
@@ -44,7 +45,8 @@ interface PortfolioFormData {
   is_featured: boolean;
 }
 
-export const PortfolioItemCreate = () => {
+export const PortfolioItemEdit = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [mainImageUrl, setMainImageUrl] = useState("");
@@ -53,30 +55,27 @@ export const PortfolioItemCreate = () => {
   const { data: identity } = useGetIdentity<Identity>();
   const userId = identity?.id;
 
-  const { mutate: createPortfolioItem } = useCreate();
+  const { mutate: updatePortfolioItem } = useUpdate();
+
+  // Pobranie szczegółów projektu
+  const { data: portfolioData, isLoading } = useOne({
+    resource: "auditor_portfolio_items",
+    id: id!,
+    queryOptions: {
+      enabled: !!id,
+    },
+  });
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
-  } = useForm<PortfolioFormData>({
-    defaultValues: {
-      title: "",
-      location: "",
-      building_type: "",
-      building_area: "",
-      completion_date: "",
-      description: "",
-      energy_class_before: "",
-      energy_class_after: "",
-      main_image_url: "",
-      additional_images: [],
-      key_features: [],
-      is_featured: false,
-    },
-  });
+  } = useForm<PortfolioFormData>();
+
+  const portfolioItem = portfolioData?.data;
 
   const buildingTypes = [
     { value: "dom_jednorodzinny", label: "Dom jednorodzinny" },
@@ -118,6 +117,61 @@ export const PortfolioItemCreate = () => {
 
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 
+  // Initialize form with existing data
+  useEffect(() => {
+    if (portfolioItem) {
+      const formatDate = (dateString: string) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      };
+
+      reset({
+        title: portfolioItem.title || "",
+        location: portfolioItem.location || "",
+        building_type: portfolioItem.building_type || "",
+        building_area: portfolioItem.building_area?.toString() || "",
+        completion_date: formatDate(portfolioItem.completion_date),
+        description: portfolioItem.description || "",
+        energy_class_before: portfolioItem.energy_class_before || "",
+        energy_class_after: portfolioItem.energy_class_after || "",
+        main_image_url: portfolioItem.main_image_url || "",
+        additional_images: portfolioItem.additional_images || [],
+        key_features: portfolioItem.key_features || [],
+        is_featured: portfolioItem.is_featured || false,
+      });
+
+      setSelectedFeatures(portfolioItem.key_features || []);
+      setSelectedImages(portfolioItem.additional_images || []);
+    }
+  }, [portfolioItem, reset]);
+
+  // Show loading state
+  if (!userId || isLoading || !portfolioItem) {
+    return (
+      <div className="p-6 mx-auto">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user owns this portfolio item
+  if (portfolioItem.auditor_id !== userId) {
+    return (
+      <div className="p-6 mx-auto text-center">
+        <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+        <h2 className="text-xl font-semibold mb-2">Brak dostępu</h2>
+        <p className="text-muted-foreground mb-4">Nie masz uprawnień do edycji tego projektu.</p>
+        <Button onClick={() => navigate('/auditor/portfolio')}>
+          Powrót do portfolio
+        </Button>
+      </div>
+    );
+  }
+
   const handleFeatureToggle = (feature: string) => {
     const newFeatures = selectedFeatures.includes(feature)
       ? selectedFeatures.filter(f => f !== feature)
@@ -141,9 +195,9 @@ export const PortfolioItemCreate = () => {
     setValue("additional_images", newImages);
   };
 
-  const handleFormSubmit: SubmitHandler<PortfolioFormData> = (data:PortfolioFormData) => {
-    if (!userId) {
-      console.error("User not authenticated");
+  const handleFormSubmit: SubmitHandler<PortfolioFormData> = (data: PortfolioFormData) => {
+    if (!userId || !id) {
+      console.error("Missing required data");
       return;
     }
 
@@ -156,27 +210,19 @@ export const PortfolioItemCreate = () => {
       is_featured: data.is_featured || false,
     };
 
-    createPortfolioItem({
+    updatePortfolioItem({
       resource: "auditor_portfolio_items",
+      id: id,
       values: formData,
     }, {
       onSuccess: () => {
         navigate('/auditor/portfolio');
+      },
+      onError: (error) => {
+        console.error("Error updating portfolio item:", error);
       }
     });
   };
-
-  // Show loading state if user identity is not loaded yet
-  if (!userId) {
-    return (
-      <div className="p-6 mx-auto">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -187,13 +233,30 @@ export const PortfolioItemCreate = () => {
           size="sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Powrót
+          Powrót do portfolio
         </Button>
         <Lead
-          title="Dodaj Projekt do Portfolio"
-          description="Stwórz nowy przykład zrealizowanego audytu energetycznego"
+          title="Edytuj Projekt"
+          description="Aktualizuj szczegóły projektu w portfolio"
         />
       </div>
+
+      {/* Informacja o edycji */}
+      <Card className="border-blue-200 bg-blue-50 mb-6">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Building className="w-6 h-6 text-blue-600" />
+            <div>
+              <div className="font-medium text-blue-900">
+                Edytujesz projekt: {portfolioItem.title}
+              </div>
+              <div className="text-sm text-blue-800">
+                Aktualizuj informacje o projekcie, dodaj nowe zdjęcia lub zmień jego status.
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Formularz */}
@@ -202,7 +265,7 @@ export const PortfolioItemCreate = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building className="w-5 h-5" />
-                Szczegóły projektu
+                Aktualizuj projekt
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -286,7 +349,10 @@ export const PortfolioItemCreate = () => {
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="building_type">Typ budynku *</Label>
-                      <Select onValueChange={(value) => setValue("building_type", value)}>
+                      <Select 
+                        value={watch("building_type")} 
+                        onValueChange={(value) => setValue("building_type", value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Wybierz typ budynku" />
                         </SelectTrigger>
@@ -329,7 +395,10 @@ export const PortfolioItemCreate = () => {
                           Klasa energetyczna przed audytem
                         </div>
                       </Label>
-                      <Select onValueChange={(value) => setValue("energy_class_before", value)}>
+                      <Select 
+                        value={watch("energy_class_before")} 
+                        onValueChange={(value) => setValue("energy_class_before", value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Wybierz klasę" />
                         </SelectTrigger>
@@ -350,7 +419,10 @@ export const PortfolioItemCreate = () => {
                           Klasa energetyczna po modernizacji
                         </div>
                       </Label>
-                      <Select onValueChange={(value) => setValue("energy_class_after", value)}>
+                      <Select 
+                        value={watch("energy_class_after")} 
+                        onValueChange={(value) => setValue("energy_class_after", value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Wybierz klasę" />
                         </SelectTrigger>
@@ -489,7 +561,8 @@ export const PortfolioItemCreate = () => {
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="is_featured"
-                      {...register("is_featured")}
+                      checked={watch("is_featured")}
+                      onCheckedChange={(checked) => setValue("is_featured", !!checked)}
                     />
                     <Label htmlFor="is_featured" className="cursor-pointer">
                       Wyróżnij ten projekt w portfolio
@@ -510,7 +583,7 @@ export const PortfolioItemCreate = () => {
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
                     <Save className="w-4 h-4 mr-2" />
-                    {isSubmitting ? "Zapisywanie..." : "Dodaj projekt"}
+                    {isSubmitting ? "Zapisywanie..." : "Zapisz zmiany"}
                   </Button>
                 </div>
               </form>
@@ -518,38 +591,35 @@ export const PortfolioItemCreate = () => {
           </Card>
         </div>
 
-        {/* Podgląd i wskazówki */}
+        {/* Podgląd i informacje */}
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle>Wskazówki</CardTitle>
+              <CardTitle>Informacje o projekcie</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 text-sm text-muted-foreground">
+              <div className="space-y-4 text-sm">
                 <div>
-                  <div className="font-medium text-foreground mb-1">📋 Tytuł projektu</div>
-                  <div>Użyj opisowego tytułu, który jasno określa rodzaj audytu</div>
+                  <div className="font-medium text-foreground mb-1">📅 Utworzony</div>
+                  <div className="text-muted-foreground">
+                    {new Date(portfolioItem.created_at).toLocaleDateString()}
+                  </div>
                 </div>
 
                 <div>
-                  <div className="font-medium text-foreground mb-1">📍 Lokalizacja</div>
-                  <div>Podaj miasto i region (bez dokładnego adresu)</div>
+                  <div className="font-medium text-foreground mb-1">🔄 Ostatnia aktualizacja</div>
+                  <div className="text-muted-foreground">
+                    {new Date(portfolioItem.updated_at).toLocaleDateString()}
+                  </div>
                 </div>
 
-                <div>
-                  <div className="font-medium text-foreground mb-1">📝 Opis projektu</div>
-                  <div>Opisz zakres prac, zastosowane rozwiązania i osiągnięte efekty</div>
-                </div>
-
-                <div>
-                  <div className="font-medium text-foreground mb-1">📸 Zdjęcia</div>
-                  <div>Dodaj zdjęcia przed i po modernizacji. Używaj bezpośrednich linków do obrazów.</div>
-                </div>
-
-                <div>
-                  <div className="font-medium text-foreground mb-1">⭐ Wyróżnienie</div>
-                  <div>Wyróżnij swoje najlepsze projekty, aby były widoczne na górze portfolio</div>
-                </div>
+                {portfolioItem.is_featured && (
+                  <div>
+                    <Badge className="bg-yellow-100 text-yellow-800">
+                      ⭐ Projekt wyróżniony
+                    </Badge>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -571,6 +641,22 @@ export const PortfolioItemCreate = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Wskazówki */}
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle className="text-base">Wskazówki do edycji</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <div>• Aktualizuj opis jeśli zmieniły się szczegóły</div>
+                <div>• Dodaj nowe zdjęcia z lepszą jakością</div>
+                <div>• Zaktualizuj klasy energetyczne po weryfikacji</div>
+                <div>• Wyróżnij swoje najlepsze projekty</div>
+                <div>• Usuń nieaktualne informacje</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>
