@@ -40,6 +40,13 @@ import {
   X,
   AlertCircle,
   ScanEye,
+  Users,
+  UserPlus,
+  ClipboardList,
+  TrendingUp,
+  Mail,
+  Loader2,
+  Wrench,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Identity } from "../../operatorTypes";
@@ -73,6 +80,33 @@ export const OperatorDashboard = () => {
   const { mutate: updateAuditRequest, isLoading: updatingAuditRequest } =
     useUpdate();
 
+  // Pobranie klientów przypisanych do operatora
+  const { data: myClients, isLoading: loadingClients } = useList({
+    resource: "users",
+    filters: [
+      {
+        field: "role",
+        operator: "eq",
+        value: "beneficiary",
+      },
+      {
+        field: "operator_id",
+        operator: "eq",
+        value: userId,
+      },
+    ],
+    sorters: [
+      {
+        field: "created_at",
+        order: "desc",
+      },
+    ],
+    pagination: { mode: "off" },
+    queryOptions: {
+      enabled: !!userId,
+    },
+  });
+
   // WSZYSTKIE service_requests - bez filtra statusu!
   const {
     data: serviceRequests,
@@ -88,7 +122,7 @@ export const OperatorDashboard = () => {
     ],
     pagination: { mode: "off" },
     queryOptions: {
-      enabled: !!userId, // Zapytanie wykona się tylko gdy userId istnieje
+      enabled: !!userId,
     },
   });
 
@@ -146,9 +180,9 @@ export const OperatorDashboard = () => {
     return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   }, []); // Pusta dependency array - data zostanie obliczona tylko raz
 
-  // Kontakty z kalkulatora (tabela user_profiles lub podobna)
+  // Kontakty z kalkulatora
   const { data: contactRequests } = useList({
-    resource: "user_profiles",
+    resource: "operator_contacts",
     filters: [
       {
         field: "created_at",
@@ -293,7 +327,7 @@ export const OperatorDashboard = () => {
 
   // Sprawdź stan loading - uwzględnij loading identity
   const isLoading =
-    identityLoading || loadingServiceRequests || loadingAuditRequests;
+    identityLoading || loadingServiceRequests || loadingAuditRequests || loadingClients;
 
   // Jeśli identity nie zostało jeszcze załadowane, pokaż loading
   if (identityLoading) {
@@ -331,7 +365,7 @@ export const OperatorDashboard = () => {
   }
 
   // Jeśli dane się ładują, pokaż loading
-  if (loadingServiceRequests || loadingAuditRequests) {
+  if (loadingServiceRequests || loadingAuditRequests || loadingClients) {
     return (
       <div className="p-6 mx-auto">
         <div className="animate-pulse space-y-6">
@@ -347,9 +381,19 @@ export const OperatorDashboard = () => {
   const allContractorOffers = contractorOffers?.data || [];
   const allAuditorOffers = auditorOffers?.data || [];
   const allContactRequests = contactRequests?.data || [];
+  const allMyClients = myClients?.data || [];
 
   // Statystyki dla operatora
   const stats = {
+    // Klienci
+    myClients: allMyClients.length,
+    newClientsThisMonth: allMyClients.filter((c: any) => {
+      const date = new Date(c.created_at);
+      const today = new Date();
+      return date.getMonth() === today.getMonth() && 
+             date.getFullYear() === today.getFullYear();
+    }).length,
+    
     // Zlecenia serwisowe
     pendingServiceRequests: allServiceRequests.filter(
       (r) => r.status === "pending"
@@ -393,12 +437,13 @@ export const OperatorDashboard = () => {
     .slice(0, 5);
   const recentServiceRequests = allServiceRequests.slice(0, 5);
   const recentAuditRequests = allAuditRequests.slice(0, 5);
+  const recentClients = allMyClients.slice(0, 5);
 
   return (
     <>
       <Lead
         title="Panel Operatora"
-        description="Moderacja zleceń, weryfikacja użytkowników i zarządzanie systemem"
+        description="Zarządzanie klientami, moderacja zleceń i weryfikacja użytkowników"
       />
 
       {/* Alerty dla operatora */}
@@ -444,44 +489,59 @@ export const OperatorDashboard = () => {
         </Card>
       )}
 
-      {/* Statystyki operatora */}
+      {/* Statystyki operatora - Rozszerzone */}
       <GridBox variant="1-2-4">
-        <Card>
+        <Card className="border-blue-200 bg-blue-50">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8 text-blue-600" />
+              <Users className="w-8 h-8 text-blue-600" />
               <div>
-                
-                  <div className="text-2xl font-bold">
-                    {stats.totalServiceRequests}
-                  </div>
-                  
-                
-
-                <div className="text-sm text-muted-foreground">
-                  Wszystkie zlecenia wykonawców
+                <div className="text-2xl font-bold">
+                  {stats.myClients}
                 </div>
-
-            
+                <div className="text-sm text-muted-foreground">
+                  Moi klienci
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  +{stats.newClientsThisMonth} w tym miesiącu
+                </div>
               </div>
             </div>
           </CardContent>
-          <CardFooter>    <div className="flex justify-end gap-4 text-xs mt-1 w-full">
-                    <div className="text-orange-600 flex gap-1 border border-orange-200 p-1 px-2 rounded">
-                      {stats.pendingServiceRequests}{" "}
-                      <ScanEye className="w-4 h-4" />
-                    </div>
-                    <div className="text-green-600 flex gap-1 border border-green-200 p-1 px-2 rounded">
-                      {stats.verifiedServiceRequests}{" "}
-                      <Check className="w-4 h-4" />
-                    </div>
-                    {stats.rejectedServiceRequests > 0 && (
-                      <div className="text-red-600 flex gap-1 border border-red-200 p-1 px-2 rounded">
-                        {stats.rejectedServiceRequests}{" "}
-                        <X className="w-4 h-4" />
-                      </div>
-                    )}
-                  </div></CardFooter>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <FileText className="w-8 h-8 text-purple-600" />
+              <div>
+                <div className="text-2xl font-bold">
+                  {stats.totalServiceRequests}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Wszystkie zlecenia wykonawców
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <div className="flex justify-end gap-4 text-xs mt-1 w-full">
+              <div className="text-orange-600 flex gap-1 border border-orange-200 p-1 px-2 rounded">
+                {stats.pendingServiceRequests}{" "}
+                <ScanEye className="w-4 h-4" />
+              </div>
+              <div className="text-green-600 flex gap-1 border border-green-200 p-1 px-2 rounded">
+                {stats.verifiedServiceRequests}{" "}
+                <Check className="w-4 h-4" />
+              </div>
+              {stats.rejectedServiceRequests > 0 && (
+                <div className="text-red-600 flex gap-1 border border-red-200 p-1 px-2 rounded">
+                  {stats.rejectedServiceRequests}{" "}
+                  <X className="w-4 h-4" />
+                </div>
+              )}
+            </div>
+          </CardFooter>
         </Card>
 
         <Card>
@@ -516,23 +576,7 @@ export const OperatorDashboard = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <Euro className="w-8 h-8 text-green-600" />
-              <div>
-                <div className="text-2xl font-bold">
-                  {stats.pendingContractorOffers}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Nowe oferty wykonawców
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <User className="w-8 h-8 text-indigo-600" />
+              <Phone className="w-8 h-8 text-indigo-600" />
               <div>
                 <div className="text-2xl font-bold">{stats.newContacts}</div>
                 <div className="text-sm text-muted-foreground">
@@ -546,8 +590,11 @@ export const OperatorDashboard = () => {
 
       {/* Główne tabs operatora */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Przegląd</TabsTrigger>
+          <TabsTrigger value="my-clients">
+            Moi klienci
+          </TabsTrigger>
           <TabsTrigger value="service-moderation">
             Moderacja Wykonawców{" "}
             {stats.pendingServiceRequests > 0 &&
@@ -572,6 +619,14 @@ export const OperatorDashboard = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button
+                    className="w-full"
+                    onClick={() => navigate("/operator/clients")}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Zarządzaj klientami ({stats.myClients})
+                  </Button>
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => setActiveTab("service-moderation")}
                   >
@@ -602,6 +657,59 @@ export const OperatorDashboard = () => {
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Generuj raporty
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* Widget nowych klientów */}
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Najnowsi klienci</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate("/operator/clients")}
+                    >
+                      <UserPlus className="w-4 h-4" />
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {recentClients.length > 0 ? (
+                    <div className="space-y-2">
+                      {recentClients.slice(0, 3).map((client: any) => (
+                        <div 
+                          key={client.id} 
+                          className="flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer"
+                          onClick={() => navigate(`/operator/client/${client.id}`)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm font-medium">
+                                {client.first_name} {client.last_name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(client.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <Eye className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">Brak klientów</p>
+                      <Button
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => navigate("/operator/clients")}
+                      >
+                        Dodaj pierwszego
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -684,6 +792,95 @@ export const OperatorDashboard = () => {
               </Card>
             </div>
           </GridBox>
+        </TabsContent>
+
+        {/* Tab: Moi klienci */}
+        <TabsContent value="my-clients">
+          <Card>
+            <CardHeader>
+              <FlexBox>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Moi klienci ({stats.myClients})
+                </CardTitle>
+                <Button onClick={() => navigate("/operator/clients")}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Dodaj klienta
+                </Button>
+              </FlexBox>
+            </CardHeader>
+            <CardContent>
+              {allMyClients.length > 0 ? (
+                <div className="space-y-4">
+                  {allMyClients.map((client: any) => (
+                    <Card key={client.id} className="border">
+                      <CardContent className="p-4">
+                        <FlexBox>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              <h4 className="font-medium">
+                                {client.first_name} {client.last_name}
+                              </h4>
+                            </div>
+                            <div className="grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
+                              <div className="flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                {client.email}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Phone className="w-3 h-3" />
+                                {client.phone_number || "Brak telefonu"}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {client.city || "Brak adresu"}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 mt-2">
+                              <span className="text-xs">
+                                Dodany: {new Date(client.created_at).toLocaleDateString()}
+                              </span>
+                              <Badge variant="outline" className="text-xs">
+                                {client.status || "Aktywny"}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/operator/client/${client.id}`)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Szczegóły
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/operator/service-request/create-for-client/${client.id}`)}
+                            >
+                              <Wrench className="w-4 h-4 mr-1" />
+                              Nowe zlecenie
+                            </Button>
+                          </div>
+                        </FlexBox>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p className="mb-4">Nie masz jeszcze żadnych klientów</p>
+                  <Button onClick={() => navigate("/operator/clients")}>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Dodaj pierwszego klienta
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Tab: Moderacja Wykonawców */}
@@ -920,12 +1117,104 @@ export const OperatorDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Moduł raportów - do implementacji</p>
-                <p className="text-sm">
-                  Statystyki aktywności, zleceń, użytkowników
-                </p>
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Statystyki klientów */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Statystyki klientów</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Wszyscy klienci</span>
+                        <span className="font-medium">{stats.myClients}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Nowi w tym miesiącu</span>
+                        <span className="font-medium">{stats.newClientsThisMonth}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Aktywni</span>
+                        <span className="font-medium">
+                          {allMyClients.filter((c: any) => c.status === 'active').length}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Statystyki zleceń */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Statystyki zleceń</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Wszystkie zlecenia</span>
+                        <span className="font-medium">
+                          {stats.totalServiceRequests + stats.totalAuditRequests}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Do moderacji</span>
+                        <span className="font-medium text-orange-600">
+                          {stats.pendingServiceRequests + stats.pendingAuditRequests}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Zweryfikowane</span>
+                        <span className="font-medium text-green-600">
+                          {stats.verifiedServiceRequests + stats.verifiedAuditRequests}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Wydajność operatora */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Wydajność operatora</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Zweryfikowane dzisiaj</span>
+                        <span className="font-medium">0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Średni czas weryfikacji</span>
+                        <span className="font-medium">-</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Współczynnik odrzuceń</span>
+                        <span className="font-medium">-</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Generowanie raportów */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Generuj raport</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Raport miesięczny
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Analiza trendów
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Users className="w-4 h-4 mr-2" />
+                      Raport klientów
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
