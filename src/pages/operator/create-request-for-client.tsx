@@ -1,5 +1,5 @@
 // src/pages/operator/create-request-for-client.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useOne, useCreate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
@@ -85,18 +85,20 @@ export const CreateRequestForClient = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<CreateRequestFormData>({
-    defaultValues: {
-      postal_code: clientData?.data?.postal_code || "",
-      city: clientData?.data?.city || "",
-      street_address: clientData?.data?.street_address || "",
-      phone_number: clientData?.data?.phone_number || "",
-      needs_audit: false,
-    },
-  });
+  } = useForm<CreateRequestFormData>();
 
   const client = clientData?.data;
   const isServiceRequest = type === "service";
+
+  // Update form values when client data is loaded
+  useEffect(() => {
+    if (client) {
+      setValue("postal_code", client.postal_code || "");
+      setValue("city", client.city || "");
+      setValue("street_address", client.street_address || "");
+      setValue("phone_number", client.phone_number || "");
+    }
+  }, [client, setValue]);
 
   const handleFormSubmit = async (data: CreateRequestFormData) => {
     if (!client) return;
@@ -269,7 +271,7 @@ export const CreateRequestForClient = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit((data) => handleFormSubmit(data as CreateRequestFormData))} className="space-y-6">
         {/* Address Information */}
         <Card>
           <CardHeader>
@@ -301,7 +303,7 @@ export const CreateRequestForClient = () => {
                 />
                 {errors.postal_code && (
                   <p className="text-sm text-red-500">
-                    {errors.postal_code.message}
+                    {typeof errors.postal_code.message === 'string' ? errors.postal_code.message : 'Błąd walidacji'}
                   </p>
                 )}
               </div>
@@ -318,7 +320,7 @@ export const CreateRequestForClient = () => {
                 />
                 {errors.city && (
                   <p className="text-sm text-red-500">
-                    {errors.city.message}
+                    {typeof errors.city.message === 'string' ? errors.city.message : 'Błąd walidacji'}
                   </p>
                 )}
               </div>
@@ -341,7 +343,7 @@ export const CreateRequestForClient = () => {
               />
               {errors.street_address && (
                 <p className="text-sm text-red-500">
-                  {errors.street_address.message}
+                  {typeof errors.street_address.message === 'string' ? errors.street_address.message : 'Błąd walidacji'}
                 </p>
               )}
             </div>
@@ -364,7 +366,7 @@ export const CreateRequestForClient = () => {
               />
               {errors.phone_number && (
                 <p className="text-sm text-red-500">
-                  {errors.phone_number.message}
+                  {typeof errors.phone_number.message === 'string' ? errors.phone_number.message : 'Błąd walidacji'}
                 </p>
               )}
             </div>

@@ -12,8 +12,9 @@ System automatycznie przypisuje klienta do operatora
 Wysyła dane dostępowe do klienta (beneficjenta) (supabase email)
 
 
-NOWE: Składa zlecenia w imieniu klienta:
+NOWE: 
 
+Składa zlecenia w imieniu klienta (beneficjent)
 Wypełnia formularz zlecenia dla wykonawcy (zakładka 2)
 Zaznacza checkbox "Potrzebny audyt" - zlecenie trafia wtedy najpierw na giełdę audytorów
 Po otrzymaniu audytu, zlecenie automatycznie trafia na giełdę wykonawców
