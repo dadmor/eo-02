@@ -59,54 +59,48 @@ export const authProvider: AuthBindings = {
       },
     };
   },
-  register: async ({ email, password, role }) => {
+  register: async ({ email, password, role, operator_id }) => {
     try {
-      console.log("🔄 Rozpoczynam rejestrację dla:", email);
-      
+      console.log("🔄 Rozpoczynam rejestrację dla:", email, "operator_id:", operator_id);
+  
+      // Budujemy metadata dynamicznie
+      const metadata: Record<string, any> = { role };
+      if (operator_id) {
+        metadata.operator_id = operator_id;
+      }
+  
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            role: role,
-          },
+          data: metadata,
         },
       });
-
-      // ✅ NAJPIERW sprawdź błąd - to jest kluczowe!
+  
       if (error) {
         console.error("❌ Supabase registration error:", error);
-        
-        // ✅ WAŻNE: Zawsze zwróć success: false przy błędzie!
         return {
           success: false,
           error: {
             message: error.message,
             name: error.name || "Registration Error",
-            // ✅ Dodaj wszystkie szczegóły błędu
-            details: error
+            details: error,
           },
         };
       }
-
-      // ✅ Sprawdź czy użytkownik został utworzony
+  
       if (data?.user) {
         console.log("✅ Użytkownik utworzony:", data.user.email);
-        
-        // ✅ Sprawdź czy email wymaga potwierdzenia
         if (data.user && !data.user.email_confirmed_at) {
           console.log("📧 Email wymaga potwierdzenia");
         }
-        
         return {
           success: true,
-          // ✅ Zwróć dodatkowe informacje o użytkowniku
           user: data.user,
-          session: data.session
+          session: data.session,
         };
       }
-
-      // ✅ Fallback jeśli coś poszło nie tak
+  
       console.error("❌ Brak danych użytkownika w odpowiedzi");
       return {
         success: false,
@@ -115,21 +109,20 @@ export const authProvider: AuthBindings = {
           name: "Registration Error",
         },
       };
-
+  
     } catch (error: any) {
       console.error("❌ Registration catch error:", error);
-      
-      // ✅ Upewnij się że błąd jest zawsze zwracany jako success: false
       return {
         success: false,
         error: {
           message: error.message || "Registration failed",
           name: error.name || "Network Error",
-          details: error
+          details: error,
         },
       };
     }
   },
+  
   forgotPassword: async ({ email }) => {
     try {
       const { data, error } = await supabaseClient.auth.resetPasswordForEmail(

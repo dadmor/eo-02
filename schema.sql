@@ -237,5 +237,6 @@ phone_number TEXT,
 city TEXT,                                              
 postal_code TEXT,                                       
 name TEXT,                                              
-street_address TEXT                                     
+street_address TEXT,                                    
+operator_id UUID                                        
 );

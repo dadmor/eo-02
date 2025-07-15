@@ -1,6 +1,6 @@
 // src/pages/operator/client-management.tsx
 import { useState } from "react";
-import { useList, useCreate, useUpdate, useDelete } from "@refinedev/core";
+import { useList, useCreate, useUpdate, useDelete, useRegister } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,7 @@ export const ClientManagement = () => {
   const navigate = useNavigate();
   const { data: identity } = useGetIdentity<Identity>();
   const operatorId = identity?.id;
+  const { mutate: registerUser } = useRegister();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -81,7 +82,6 @@ export const ClientManagement = () => {
     },
   });
 
-  const { mutate: createClient, isLoading: isCreating } = useCreate();
   const { mutate: updateClient, isLoading: isUpdating } = useUpdate();
   const { mutate: deleteClient, isLoading: isDeleting } = useDelete();
 
@@ -102,30 +102,65 @@ export const ClientManagement = () => {
     client.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddClient = (data: any) => {
-    createClient({
-      resource: "users",
-      values: {
-        ...data,
-        role: "beneficiary",
+  const handleAddClient = async (data: any) => {
+    try {
+      // Generuj tymczasowe hasło
+      const tempPassword = `Welcome${Math.random().toString(36).slice(-6)}!@`;
+      
+      // Przygotuj dane do rejestracji
+      const registerData = {
+        email: data.email,
+        password: tempPassword,
+        role: 'beneficiary',
+        // Dodatkowe dane
+        first_name: data.first_name,
+        last_name: data.last_name,
+        name: `${data.first_name} ${data.last_name}`,
+        phone_number: data.phone_number,
+        street_address: data.street_address,
+        city: data.city,
+        postal_code: data.postal_code,
         operator_id: operatorId,
-        created_at: new Date().toISOString(),
-      },
-    }, {
-      onSuccess: () => {
-        toast.success("Klient został dodany", {
-          description: "Dane dostępowe zostały wysłane na podany adres email.",
-        });
-        setShowAddDialog(false);
-        reset();
-        refetch();
-      },
-      onError: () => {
-        toast.error("Błąd", {
-          description: "Nie udało się dodać klienta.",
-        });
-      },
-    });
+      };
+
+      // Użyj useRegister z Refine
+      registerUser(registerData, {
+        onSuccess: () => {
+          // Pokaż hasło w toaście i skopiuj do schowka
+          toast.success("Klient został dodany!", {
+            description: (
+              <div>
+                <p>Email: {data.email}</p>
+                <p>Hasło: <code>{tempPassword}</code></p>
+                <p className="text-xs mt-2">Hasło skopiowane do schowka!</p>
+              </div>
+            ),
+            duration: 15000 // 15 sekund
+          });
+          
+          // Skopiuj hasło do schowka
+          navigator.clipboard.writeText(tempPassword);
+          
+          setShowAddDialog(false);
+          reset();
+          
+          // Odśwież listę
+          refetch();
+        },
+        onError: (error: any) => {
+          console.error("Error in handleAddClient:", error);
+          toast.error("Błąd", {
+            description: error?.message || "Nie udało się dodać klienta.",
+          });
+        }
+      });
+      
+    } catch (error: any) {
+      console.error("Error in handleAddClient:", error);
+      toast.error("Błąd", {
+        description: error?.message || "Nie udało się dodać klienta.",
+      });
+    }
   };
 
   const handleEditClient = (data: any) => {
@@ -134,7 +169,10 @@ export const ClientManagement = () => {
     updateClient({
       resource: "users",
       id: selectedClient.id,
-      values: data,
+      values: {
+        ...data,
+        name: `${data.first_name} ${data.last_name}`,
+      },
     }, {
       onSuccess: () => {
         toast.success("Dane klienta zaktualizowane");
@@ -173,8 +211,16 @@ export const ClientManagement = () => {
   };
 
   const openEditDialog = (client: Client) => {
+    // Rozdziel imię i nazwisko
+    const nameParts = client.name?.split(' ') || ['', ''];
+    const editData = {
+      ...client,
+      first_name: nameParts[0] || '',
+      last_name: nameParts.slice(1).join(' ') || '',
+    };
+    
     setSelectedClient(client);
-    reset(client);
+    reset(editData);
     setShowEditDialog(true);
   };
 
@@ -519,9 +565,9 @@ export const ClientManagement = () => {
                 <div className="text-sm">
                   <p className="font-medium text-blue-900">Informacja</p>
                   <p className="text-blue-700">
-                    Po dodaniu klienta, dane dostępowe zostaną automatycznie 
-                    wysłane na podany adres email. Klient będzie mógł zalogować 
-                    się do systemu i składać zlecenia.
+                    Po dodaniu klienta, system wygeneruje tymczasowe hasło, 
+                    które zostanie wyświetlone. Przekaż je klientowi, aby mógł 
+                    zalogować się do systemu.
                   </p>
                 </div>
               </div>
@@ -534,10 +580,7 @@ export const ClientManagement = () => {
               }}>
                 Anuluj
               </Button>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating && (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                )}
+              <Button type="submit">
                 Dodaj klienta
               </Button>
             </DialogFooter>
