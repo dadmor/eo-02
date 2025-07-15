@@ -10,9 +10,7 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Layout } from "./components/layout";
 import { authProvider, supabaseClient } from "./utility";
 
-
-import { authRoutes } from "./pages/auth";
-
+import { authRoutes, UpdatePasswordPage } from "./pages/auth";
 
 // Import zorganizowanych beneficiary exports
 import {
@@ -32,17 +30,22 @@ import {
   contractorRoutes,
 } from "./pages/contractor";
 
-
-// Import zorganizowanych contractor exports
+// Import zorganizowanych operator exports
 import {
   operatorResources,
   operatorRoutes,
 } from "./pages/operator";
 
+// Import komponentu do obsługi reset hasła
+
+import { ErrorHandler } from "./ErrorHandler";
+
+
 function App() {
   return (
     <BrowserRouter>
-      <Refine
+      <ErrorHandler>
+        <Refine
         dataProvider={dataProvider(supabaseClient)}
         liveProvider={liveProvider(supabaseClient)}
         authProvider={authProvider}
@@ -62,6 +65,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           {...authRoutes}
+          
+       
 
           {/* Protected routes wrapper */}
           <Route
@@ -95,8 +100,9 @@ function App() {
         <UnsavedChangesNotifier />
         <DocumentTitleHandler />
       </Refine>
-    </BrowserRouter>
-  );
+    </ErrorHandler>
+  </BrowserRouter>
+);
 }
 
 export default App;

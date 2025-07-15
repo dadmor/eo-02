@@ -62,12 +62,19 @@ export const useRegistration = (): UseRegistrationResult => {
         return "Nieprawidłowy format adresu email.";
       }
       
-      if (message.includes("User already registered") || message.includes("already exists")) {
+      if (message.includes("User already registered") || 
+          message.includes("already exists") || 
+          message.includes("już istnieje")) {
         return "Konto z tym adresem email już istnieje.";
       }
       
       if (code === "over_email_send_rate_limit" || message.includes("over_email_send_rate_limit")) {
         return "Za szybko! Poczekaj 2 sekundy przed ponowną próbą rejestracji.";
+      }
+      
+      // Obsługa kodu user_already_exists
+      if (code === "user_already_exists") {
+        return "Konto z tym adresem email już istnieje.";
       }
       
       return message || "Wystąpił błąd podczas rejestracji.";

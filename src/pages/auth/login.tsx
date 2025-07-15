@@ -1,4 +1,4 @@
-// LoginPage.tsx - Ulepszona wersja z lepszą obsługą błędów
+// src/pages/auth/login.tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertTriangle, Info, Mail, Lock } from "lucide-react";
+import { Loader2, AlertTriangle, Info, Mail, Lock, CheckCircle } from "lucide-react";
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
-import { useLoginForm } from "@/utility/useLoginForm"; // Import custom hook
-import { Link } from "react-router-dom";
+import { useLoginForm } from "@/utility/useLoginForm";
+import { Link, useSearchParams } from "react-router-dom";
 
 export const LoginPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const {
     email,
     password,
@@ -27,6 +28,10 @@ export const LoginPage: React.FC = () => {
     error,
     handleSubmit,
   } = useLoginForm();
+
+  // Sprawdź parametry URL dla komunikatów
+  const verified = searchParams.get('verified') === 'true';
+  const passwordChanged = searchParams.get('passwordChanged') === 'true';
 
   // Funkcja sprawdzająca czy formularz jest prawidłowy
   const isFormValid = email.trim().length > 0 && password.length > 0;
@@ -48,8 +53,6 @@ export const LoginPage: React.FC = () => {
 
   return (
     <NarrowCol>
-    
-
       <Card>
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
@@ -59,6 +62,26 @@ export const LoginPage: React.FC = () => {
         </CardHeader>
 
         <CardContent>
+          {/* Komunikat o potwierdzeniu emaila */}
+          {verified && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <strong>Email potwierdzony!</strong> Możesz się teraz zalogować.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Komunikat o zmianie hasła */}
+          {passwordChanged && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <strong>Hasło zmienione!</strong> Możesz się zalogować używając nowego hasła.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center">
