@@ -1,4 +1,4 @@
-// RegisterStep2.tsx - POPRAWIONE
+// pages/auth/RegisterStep2.tsx - POPRAWIONE
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";

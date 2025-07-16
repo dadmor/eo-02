@@ -1,6 +1,6 @@
 // src/pages/operator/client-management.tsx
 import { useState } from "react";
-import { useList, useDelete } from "@refinedev/core";
+import { useList, useUpdate } from "@refinedev/core";
 import { useGetIdentity } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, Input } from "@/components/ui";
@@ -34,8 +34,6 @@ import {
 } from "lucide-react";
 import { Identity } from "../../operatorTypes";
 import { useNavigate } from "react-router-dom";
-import { ClientFormDialog } from "./ClientFormDialog";
-
 
 interface Client {
   id: string;
@@ -56,7 +54,6 @@ export const ClientManagement = () => {
   const operatorId = identity?.id;
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [showFormDialog, setShowFormDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -81,7 +78,7 @@ export const ClientManagement = () => {
     },
   });
 
-  const { mutate: deleteClient, isLoading: isDeleting } = useDelete();
+  const { mutate: updateClient, isLoading: isDeleting } = useUpdate();
 
   const clients = clientsData?.data || [];
   
@@ -96,32 +93,36 @@ export const ClientManagement = () => {
   const handleDeleteClient = () => {
     if (!selectedClient) return;
 
-    deleteClient({
+    // Zamiast usuwać, odpinamy klienta od operatora
+    updateClient({
       resource: "users",
       id: selectedClient.id,
+      values: {
+        operator_id: null,
+      },
     }, {
       onSuccess: () => {
-        toast.success("Klient został usunięty");
+        toast.success("Klient został odpięty", {
+          description: "Klient nie jest już przypisany do Ciebie.",
+        });
         setShowDeleteDialog(false);
         setSelectedClient(null);
         refetch();
       },
       onError: () => {
         toast.error("Błąd", {
-          description: "Nie udało się usunąć klienta.",
+          description: "Nie udało się odpiąć klienta.",
         });
       },
     });
   };
 
-  const openAddDialog = () => {
-    setSelectedClient(null);
-    setShowFormDialog(true);
+  const handleAddClient = () => {
+    navigate("/operator/client/new");
   };
 
-  const openEditDialog = (client: Client) => {
-    setSelectedClient(client);
-    setShowFormDialog(true);
+  const handleEditClient = (client: Client) => {
+    navigate(`/operator/client/${client.id}/edit`);
   };
 
   const openDeleteDialog = (client: Client) => {
@@ -153,7 +154,7 @@ export const ClientManagement = () => {
             Zarządzaj klientami przypisanymi do Ciebie
           </p>
         </div>
-        <Button onClick={openAddDialog}>
+        <Button onClick={handleAddClient}>
           <UserPlus className="w-4 h-4 mr-2" />
           Dodaj klienta
         </Button>
@@ -315,7 +316,7 @@ export const ClientManagement = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => openEditDialog(client)}
+                            onClick={() => handleEditClient(client)}
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -342,7 +343,7 @@ export const ClientManagement = () => {
                              "Dodaj pierwszego klienta, aby rozpocząć"}
               </p>
               {!searchTerm && (
-                <Button onClick={openAddDialog}>
+                <Button onClick={handleAddClient}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   Dodaj pierwszego klienta
                 </Button>
@@ -352,27 +353,18 @@ export const ClientManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Client Form Dialog (Add/Edit) */}
-      <ClientFormDialog
-        open={showFormDialog}
-        onOpenChange={setShowFormDialog}
-        client={selectedClient}
-        operatorId={operatorId}
-        onSuccess={() => refetch()}
-      />
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertCircle className="w-5 h-5" />
-              Potwierdź usunięcie
+              Potwierdź odpięcie klienta
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
-            <p>Czy na pewno chcesz usunąć tego klienta?</p>
+            <p>Czy na pewno chcesz odpiąć tego klienta od swojego konta?</p>
             
             {selectedClient && (
               <div className="p-4 bg-gray-50 rounded-lg">
@@ -381,14 +373,15 @@ export const ClientManagement = () => {
               </div>
             )}
             
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium text-red-900">Uwaga!</p>
-                  <p className="text-red-700">
-                    Ta operacja jest nieodwracalna. Wszystkie dane klienta 
-                    zostaną trwale usunięte z systemu.
+                  <p className="font-medium text-blue-900">Informacja</p>
+                  <p className="text-blue-700">
+                    Klient nie zostanie usunięty z systemu. Zostanie tylko odpięty 
+                    od Twojego konta operatora. Dane klienta zostaną zachowane, 
+                    a klient nadal będzie mógł korzystać z systemu.
                   </p>
                 </div>
               </div>
@@ -413,7 +406,7 @@ export const ClientManagement = () => {
               {isDeleting && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               )}
-              Usuń klienta
+              Odepnij klienta
             </Button>
           </DialogFooter>
         </DialogContent>

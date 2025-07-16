@@ -1,4 +1,4 @@
-// RegisterStep3.tsx - Uproszczona wersja
+// pages/auth/RegisterStep3.tsx - Uproszczona wersja
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Loader2, Check, Mail, Shield, User, AlertTriangle, KeyRound, UserCheck } from "lucide-react";
 import { NarrowCol } from "@/components/layout/NarrowCol";
 import { Lead } from "@/components/reader";
-import { useRegistration } from "@/utility/useRegistration"; // Import custom hook
+import { useRegistration } from "@/utility/auth/useRegistration"; // Import custom hook
 
 export const RegisterStep3: React.FC = () => {
   const navigate = useNavigate();

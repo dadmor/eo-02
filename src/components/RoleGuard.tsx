@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGetIdentity } from '@refinedev/core';
-import { UserData } from '@/operatorTypes';
+import { User } from '@/utility/auth/authProvider';
 
 interface RoleGuardProps {
   allowedRoles: string[];
@@ -11,7 +11,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   allowedRoles,
   children,
 }) => {
-  const { data: user, isLoading, error } = useGetIdentity<UserData>();
+  const { data: user, isLoading, error } = useGetIdentity<User>();
 
   if (isLoading) {
     return <div>Sprawdzanie uprawnień...</div>;
@@ -26,8 +26,8 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
     );
   }
 
-  // Rola znajduje się w user_metadata
-  const role = user?.user_metadata?.role;
+  // Rola jest bezpośrednio w obiekcie user z tabeli public.users
+  const role = user?.role;
 
   if (!role || !allowedRoles.includes(role)) {
     return (
@@ -38,6 +38,5 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
     );
   }
 
-  // Zwracamy tylko children bez dodatkowego tekstu
   return <>{children}</>;
 };
