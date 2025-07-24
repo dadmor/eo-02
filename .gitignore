@@ -4,6 +4,7 @@ dist
 assets
 _LLM_schema
 
+
 # Editor directories and files
 .env
 package-lock.json
