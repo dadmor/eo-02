@@ -2,7 +2,7 @@
 node_modules
 dist
 assets
-
+_LLM_schema
 
 # Editor directories and files
 .env
